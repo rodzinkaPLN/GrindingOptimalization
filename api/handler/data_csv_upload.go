@@ -1,23 +1,26 @@
 package handler
 
 import (
-	"fmt"
-	"io"
 	"net/http"
-	"os"
 
 	"github.com/labstack/echo/v4"
+	entDataset "github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 )
 
 func (h *CrudHandler) DataCSVUpload(c echo.Context) error {
+	ctx := c.Request().Context()
 	name := c.FormValue("dataset")
-	email := c.FormValue("email")
 
-	//-----------
-	// Read file
-	//-----------
+	dataset, err := h.db.Dataset.Query().Where(
+		entDataset.NameEQ(name),
+	).WithParameters().
+		Only(ctx)
+	if err != nil {
+		return err
+	}
 
-	// Source
+	dataset.QueryParameters()
+
 	file, err := c.FormFile("file")
 	if err != nil {
 		return err
@@ -28,17 +31,6 @@ func (h *CrudHandler) DataCSVUpload(c echo.Context) error {
 	}
 	defer src.Close()
 
-	// Destination
-	dst, err := os.Create(file.Filename)
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
-
-	// Copy
-	if _, err = io.Copy(dst, src); err != nil {
-		return err
-	}
-
-	return c.HTML(http.StatusOK, fmt.Sprintf("<p>File %s uploaded successfully with fields name=%s and email=%s.</p>", file.Filename, name, email))
+	// read csv file, column 0 is data, later on data points
+	return c.NoContent(http.StatusNoContent)
 }
