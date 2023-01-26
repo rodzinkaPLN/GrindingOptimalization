@@ -11,8 +11,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/migrate"
 
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/file"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/user"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -24,10 +25,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// File is the client for interacting with the File builders.
-	File *FileClient
-	// User is the client for interacting with the User builders.
-	User *UserClient
+	// Datapoint is the client for interacting with the Datapoint builders.
+	Datapoint *DatapointClient
+	// Dataset is the client for interacting with the Dataset builders.
+	Dataset *DatasetClient
+	// Parameter is the client for interacting with the Parameter builders.
+	Parameter *ParameterClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -41,8 +44,9 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.File = NewFileClient(c.config)
-	c.User = NewUserClient(c.config)
+	c.Datapoint = NewDatapointClient(c.config)
+	c.Dataset = NewDatasetClient(c.config)
+	c.Parameter = NewParameterClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -74,10 +78,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		File:   NewFileClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:       ctx,
+		config:    cfg,
+		Datapoint: NewDatapointClient(cfg),
+		Dataset:   NewDatasetClient(cfg),
+		Parameter: NewParameterClient(cfg),
 	}, nil
 }
 
@@ -95,17 +100,18 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		File:   NewFileClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:       ctx,
+		config:    cfg,
+		Datapoint: NewDatapointClient(cfg),
+		Dataset:   NewDatasetClient(cfg),
+		Parameter: NewParameterClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		File.
+//		Datapoint.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -127,115 +133,119 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.File.Use(hooks...)
-	c.User.Use(hooks...)
+	c.Datapoint.Use(hooks...)
+	c.Dataset.Use(hooks...)
+	c.Parameter.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.File.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
+	c.Datapoint.Intercept(interceptors...)
+	c.Dataset.Intercept(interceptors...)
+	c.Parameter.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
-	case *FileMutation:
-		return c.File.mutate(ctx, m)
-	case *UserMutation:
-		return c.User.mutate(ctx, m)
+	case *DatapointMutation:
+		return c.Datapoint.mutate(ctx, m)
+	case *DatasetMutation:
+		return c.Dataset.mutate(ctx, m)
+	case *ParameterMutation:
+		return c.Parameter.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
 }
 
-// FileClient is a client for the File schema.
-type FileClient struct {
+// DatapointClient is a client for the Datapoint schema.
+type DatapointClient struct {
 	config
 }
 
-// NewFileClient returns a client for the File from the given config.
-func NewFileClient(c config) *FileClient {
-	return &FileClient{config: c}
+// NewDatapointClient returns a client for the Datapoint from the given config.
+func NewDatapointClient(c config) *DatapointClient {
+	return &DatapointClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `file.Hooks(f(g(h())))`.
-func (c *FileClient) Use(hooks ...Hook) {
-	c.hooks.File = append(c.hooks.File, hooks...)
+// A call to `Use(f, g, h)` equals to `datapoint.Hooks(f(g(h())))`.
+func (c *DatapointClient) Use(hooks ...Hook) {
+	c.hooks.Datapoint = append(c.hooks.Datapoint, hooks...)
 }
 
 // Use adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `file.Intercept(f(g(h())))`.
-func (c *FileClient) Intercept(interceptors ...Interceptor) {
-	c.inters.File = append(c.inters.File, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `datapoint.Intercept(f(g(h())))`.
+func (c *DatapointClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Datapoint = append(c.inters.Datapoint, interceptors...)
 }
 
-// Create returns a builder for creating a File entity.
-func (c *FileClient) Create() *FileCreate {
-	mutation := newFileMutation(c.config, OpCreate)
-	return &FileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Datapoint entity.
+func (c *DatapointClient) Create() *DatapointCreate {
+	mutation := newDatapointMutation(c.config, OpCreate)
+	return &DatapointCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of File entities.
-func (c *FileClient) CreateBulk(builders ...*FileCreate) *FileCreateBulk {
-	return &FileCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Datapoint entities.
+func (c *DatapointClient) CreateBulk(builders ...*DatapointCreate) *DatapointCreateBulk {
+	return &DatapointCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for File.
-func (c *FileClient) Update() *FileUpdate {
-	mutation := newFileMutation(c.config, OpUpdate)
-	return &FileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Datapoint.
+func (c *DatapointClient) Update() *DatapointUpdate {
+	mutation := newDatapointMutation(c.config, OpUpdate)
+	return &DatapointUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *FileClient) UpdateOne(f *File) *FileUpdateOne {
-	mutation := newFileMutation(c.config, OpUpdateOne, withFile(f))
-	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DatapointClient) UpdateOne(d *Datapoint) *DatapointUpdateOne {
+	mutation := newDatapointMutation(c.config, OpUpdateOne, withDatapoint(d))
+	return &DatapointUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *FileClient) UpdateOneID(id uuid.UUID) *FileUpdateOne {
-	mutation := newFileMutation(c.config, OpUpdateOne, withFileID(id))
-	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DatapointClient) UpdateOneID(id uuid.UUID) *DatapointUpdateOne {
+	mutation := newDatapointMutation(c.config, OpUpdateOne, withDatapointID(id))
+	return &DatapointUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for File.
-func (c *FileClient) Delete() *FileDelete {
-	mutation := newFileMutation(c.config, OpDelete)
-	return &FileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Datapoint.
+func (c *DatapointClient) Delete() *DatapointDelete {
+	mutation := newDatapointMutation(c.config, OpDelete)
+	return &DatapointDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *FileClient) DeleteOne(f *File) *FileDeleteOne {
-	return c.DeleteOneID(f.ID)
+func (c *DatapointClient) DeleteOne(d *Datapoint) *DatapointDeleteOne {
+	return c.DeleteOneID(d.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *FileClient) DeleteOneID(id uuid.UUID) *FileDeleteOne {
-	builder := c.Delete().Where(file.ID(id))
+func (c *DatapointClient) DeleteOneID(id uuid.UUID) *DatapointDeleteOne {
+	builder := c.Delete().Where(datapoint.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &FileDeleteOne{builder}
+	return &DatapointDeleteOne{builder}
 }
 
-// Query returns a query builder for File.
-func (c *FileClient) Query() *FileQuery {
-	return &FileQuery{
+// Query returns a query builder for Datapoint.
+func (c *DatapointClient) Query() *DatapointQuery {
+	return &DatapointQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeFile},
+		ctx:    &QueryContext{Type: TypeDatapoint},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a File entity by its id.
-func (c *FileClient) Get(ctx context.Context, id uuid.UUID) (*File, error) {
-	return c.Query().Where(file.ID(id)).Only(ctx)
+// Get returns a Datapoint entity by its id.
+func (c *DatapointClient) Get(ctx context.Context, id uuid.UUID) (*Datapoint, error) {
+	return c.Query().Where(datapoint.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *FileClient) GetX(ctx context.Context, id uuid.UUID) *File {
+func (c *DatapointClient) GetX(ctx context.Context, id uuid.UUID) *Datapoint {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -243,133 +253,133 @@ func (c *FileClient) GetX(ctx context.Context, id uuid.UUID) *File {
 	return obj
 }
 
-// QueryUser queries the user edge of a File.
-func (c *FileClient) QueryUser(f *File) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
+// QueryParameters queries the parameters edge of a Datapoint.
+func (c *DatapointClient) QueryParameters(d *Datapoint) *ParameterQuery {
+	query := (&ParameterClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := f.ID
+		id := d.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, file.UserTable, file.UserColumn),
+			sqlgraph.From(datapoint.Table, datapoint.FieldID, id),
+			sqlgraph.To(parameter.Table, parameter.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, datapoint.ParametersTable, datapoint.ParametersColumn),
 		)
-		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *FileClient) Hooks() []Hook {
-	return c.hooks.File
+func (c *DatapointClient) Hooks() []Hook {
+	return c.hooks.Datapoint
 }
 
 // Interceptors returns the client interceptors.
-func (c *FileClient) Interceptors() []Interceptor {
-	return c.inters.File
+func (c *DatapointClient) Interceptors() []Interceptor {
+	return c.inters.Datapoint
 }
 
-func (c *FileClient) mutate(ctx context.Context, m *FileMutation) (Value, error) {
+func (c *DatapointClient) mutate(ctx context.Context, m *DatapointMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&FileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DatapointCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&FileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DatapointUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DatapointUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&FileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&DatapointDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown File mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Datapoint mutation op: %q", m.Op())
 	}
 }
 
-// UserClient is a client for the User schema.
-type UserClient struct {
+// DatasetClient is a client for the Dataset schema.
+type DatasetClient struct {
 	config
 }
 
-// NewUserClient returns a client for the User from the given config.
-func NewUserClient(c config) *UserClient {
-	return &UserClient{config: c}
+// NewDatasetClient returns a client for the Dataset from the given config.
+func NewDatasetClient(c config) *DatasetClient {
+	return &DatasetClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
-func (c *UserClient) Use(hooks ...Hook) {
-	c.hooks.User = append(c.hooks.User, hooks...)
+// A call to `Use(f, g, h)` equals to `dataset.Hooks(f(g(h())))`.
+func (c *DatasetClient) Use(hooks ...Hook) {
+	c.hooks.Dataset = append(c.hooks.Dataset, hooks...)
 }
 
 // Use adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
-func (c *UserClient) Intercept(interceptors ...Interceptor) {
-	c.inters.User = append(c.inters.User, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `dataset.Intercept(f(g(h())))`.
+func (c *DatasetClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Dataset = append(c.inters.Dataset, interceptors...)
 }
 
-// Create returns a builder for creating a User entity.
-func (c *UserClient) Create() *UserCreate {
-	mutation := newUserMutation(c.config, OpCreate)
-	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Dataset entity.
+func (c *DatasetClient) Create() *DatasetCreate {
+	mutation := newDatasetMutation(c.config, OpCreate)
+	return &DatasetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of User entities.
-func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
-	return &UserCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Dataset entities.
+func (c *DatasetClient) CreateBulk(builders ...*DatasetCreate) *DatasetCreateBulk {
+	return &DatasetCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for User.
-func (c *UserClient) Update() *UserUpdate {
-	mutation := newUserMutation(c.config, OpUpdate)
-	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Dataset.
+func (c *DatasetClient) Update() *DatasetUpdate {
+	mutation := newDatasetMutation(c.config, OpUpdate)
+	return &DatasetUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DatasetClient) UpdateOne(d *Dataset) *DatasetUpdateOne {
+	mutation := newDatasetMutation(c.config, OpUpdateOne, withDataset(d))
+	return &DatasetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id uuid.UUID) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DatasetClient) UpdateOneID(id uuid.UUID) *DatasetUpdateOne {
+	mutation := newDatasetMutation(c.config, OpUpdateOne, withDatasetID(id))
+	return &DatasetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for User.
-func (c *UserClient) Delete() *UserDelete {
-	mutation := newUserMutation(c.config, OpDelete)
-	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Dataset.
+func (c *DatasetClient) Delete() *DatasetDelete {
+	mutation := newDatasetMutation(c.config, OpDelete)
+	return &DatasetDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
-	return c.DeleteOneID(u.ID)
+func (c *DatasetClient) DeleteOne(d *Dataset) *DatasetDeleteOne {
+	return c.DeleteOneID(d.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *UserClient) DeleteOneID(id uuid.UUID) *UserDeleteOne {
-	builder := c.Delete().Where(user.ID(id))
+func (c *DatasetClient) DeleteOneID(id uuid.UUID) *DatasetDeleteOne {
+	builder := c.Delete().Where(dataset.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &UserDeleteOne{builder}
+	return &DatasetDeleteOne{builder}
 }
 
-// Query returns a query builder for User.
-func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{
+// Query returns a query builder for Dataset.
+func (c *DatasetClient) Query() *DatasetQuery {
+	return &DatasetQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeUser},
+		ctx:    &QueryContext{Type: TypeDataset},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id uuid.UUID) (*User, error) {
-	return c.Query().Where(user.ID(id)).Only(ctx)
+// Get returns a Dataset entity by its id.
+func (c *DatasetClient) Get(ctx context.Context, id uuid.UUID) (*Dataset, error) {
+	return c.Query().Where(dataset.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
+func (c *DatasetClient) GetX(ctx context.Context, id uuid.UUID) *Dataset {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -377,43 +387,193 @@ func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 	return obj
 }
 
-// QueryFiles queries the files edge of a User.
-func (c *UserClient) QueryFiles(u *User) *FileQuery {
-	query := (&FileClient{config: c.config}).Query()
+// QueryParameters queries the parameters edge of a Dataset.
+func (c *DatasetClient) QueryParameters(d *Dataset) *ParameterQuery {
+	query := (&ParameterClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
+		id := d.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.FilesTable, user.FilesColumn),
+			sqlgraph.From(dataset.Table, dataset.FieldID, id),
+			sqlgraph.To(parameter.Table, parameter.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dataset.ParametersTable, dataset.ParametersColumn),
 		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *UserClient) Hooks() []Hook {
-	return c.hooks.User
+func (c *DatasetClient) Hooks() []Hook {
+	return c.hooks.Dataset
 }
 
 // Interceptors returns the client interceptors.
-func (c *UserClient) Interceptors() []Interceptor {
-	return c.inters.User
+func (c *DatasetClient) Interceptors() []Interceptor {
+	return c.inters.Dataset
 }
 
-func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {
+func (c *DatasetClient) mutate(ctx context.Context, m *DatasetMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&UserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DatasetCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&UserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DatasetUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DatasetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&UserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&DatasetDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Dataset mutation op: %q", m.Op())
+	}
+}
+
+// ParameterClient is a client for the Parameter schema.
+type ParameterClient struct {
+	config
+}
+
+// NewParameterClient returns a client for the Parameter from the given config.
+func NewParameterClient(c config) *ParameterClient {
+	return &ParameterClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `parameter.Hooks(f(g(h())))`.
+func (c *ParameterClient) Use(hooks ...Hook) {
+	c.hooks.Parameter = append(c.hooks.Parameter, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `parameter.Intercept(f(g(h())))`.
+func (c *ParameterClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Parameter = append(c.inters.Parameter, interceptors...)
+}
+
+// Create returns a builder for creating a Parameter entity.
+func (c *ParameterClient) Create() *ParameterCreate {
+	mutation := newParameterMutation(c.config, OpCreate)
+	return &ParameterCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Parameter entities.
+func (c *ParameterClient) CreateBulk(builders ...*ParameterCreate) *ParameterCreateBulk {
+	return &ParameterCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Parameter.
+func (c *ParameterClient) Update() *ParameterUpdate {
+	mutation := newParameterMutation(c.config, OpUpdate)
+	return &ParameterUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ParameterClient) UpdateOne(pa *Parameter) *ParameterUpdateOne {
+	mutation := newParameterMutation(c.config, OpUpdateOne, withParameter(pa))
+	return &ParameterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ParameterClient) UpdateOneID(id uuid.UUID) *ParameterUpdateOne {
+	mutation := newParameterMutation(c.config, OpUpdateOne, withParameterID(id))
+	return &ParameterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Parameter.
+func (c *ParameterClient) Delete() *ParameterDelete {
+	mutation := newParameterMutation(c.config, OpDelete)
+	return &ParameterDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ParameterClient) DeleteOne(pa *Parameter) *ParameterDeleteOne {
+	return c.DeleteOneID(pa.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ParameterClient) DeleteOneID(id uuid.UUID) *ParameterDeleteOne {
+	builder := c.Delete().Where(parameter.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ParameterDeleteOne{builder}
+}
+
+// Query returns a query builder for Parameter.
+func (c *ParameterClient) Query() *ParameterQuery {
+	return &ParameterQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeParameter},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Parameter entity by its id.
+func (c *ParameterClient) Get(ctx context.Context, id uuid.UUID) (*Parameter, error) {
+	return c.Query().Where(parameter.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ParameterClient) GetX(ctx context.Context, id uuid.UUID) *Parameter {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryDatasets queries the datasets edge of a Parameter.
+func (c *ParameterClient) QueryDatasets(pa *Parameter) *DatasetQuery {
+	query := (&DatasetClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pa.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parameter.Table, parameter.FieldID, id),
+			sqlgraph.To(dataset.Table, dataset.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, parameter.DatasetsTable, parameter.DatasetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pa.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDatapoints queries the datapoints edge of a Parameter.
+func (c *ParameterClient) QueryDatapoints(pa *Parameter) *DatapointQuery {
+	query := (&DatapointClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pa.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parameter.Table, parameter.FieldID, id),
+			sqlgraph.To(datapoint.Table, datapoint.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, parameter.DatapointsTable, parameter.DatapointsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pa.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ParameterClient) Hooks() []Hook {
+	return c.hooks.Parameter
+}
+
+// Interceptors returns the client interceptors.
+func (c *ParameterClient) Interceptors() []Interceptor {
+	return c.inters.Parameter
+}
+
+func (c *ParameterClient) mutate(ctx context.Context, m *ParameterMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ParameterCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ParameterUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ParameterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ParameterDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Parameter mutation op: %q", m.Op())
 	}
 }

@@ -6,8 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// File is the predicate function for file builders.
-type File func(*sql.Selector)
+// Datapoint is the predicate function for datapoint builders.
+type Datapoint func(*sql.Selector)
 
-// User is the predicate function for user builders.
-type User func(*sql.Selector)
+// Dataset is the predicate function for dataset builders.
+type Dataset func(*sql.Selector)
+
+// Parameter is the predicate function for parameter builders.
+type Parameter func(*sql.Selector)

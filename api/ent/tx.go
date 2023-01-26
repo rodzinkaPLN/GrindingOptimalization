@@ -12,10 +12,12 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// File is the client for interacting with the File builders.
-	File *FileClient
-	// User is the client for interacting with the User builders.
-	User *UserClient
+	// Datapoint is the client for interacting with the Datapoint builders.
+	Datapoint *DatapointClient
+	// Dataset is the client for interacting with the Dataset builders.
+	Dataset *DatasetClient
+	// Parameter is the client for interacting with the Parameter builders.
+	Parameter *ParameterClient
 
 	// lazily loaded.
 	client     *Client
@@ -147,8 +149,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.File = NewFileClient(tx.config)
-	tx.User = NewUserClient(tx.config)
+	tx.Datapoint = NewDatapointClient(tx.config)
+	tx.Dataset = NewDatasetClient(tx.config)
+	tx.Parameter = NewParameterClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -158,7 +161,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: File.QueryXXX(), the query will be executed
+// applies a query, for example: Datapoint.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

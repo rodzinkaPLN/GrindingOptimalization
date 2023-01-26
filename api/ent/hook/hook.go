@@ -9,28 +9,40 @@ import (
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent"
 )
 
-// The FileFunc type is an adapter to allow the use of ordinary
-// function as File mutator.
-type FileFunc func(context.Context, *ent.FileMutation) (ent.Value, error)
+// The DatapointFunc type is an adapter to allow the use of ordinary
+// function as Datapoint mutator.
+type DatapointFunc func(context.Context, *ent.DatapointMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f FileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.FileMutation); ok {
+func (f DatapointFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DatapointMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FileMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DatapointMutation", m)
 }
 
-// The UserFunc type is an adapter to allow the use of ordinary
-// function as User mutator.
-type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
+// The DatasetFunc type is an adapter to allow the use of ordinary
+// function as Dataset mutator.
+type DatasetFunc func(context.Context, *ent.DatasetMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.UserMutation); ok {
+func (f DatasetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DatasetMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DatasetMutation", m)
+}
+
+// The ParameterFunc type is an adapter to allow the use of ordinary
+// function as Parameter mutator.
+type ParameterFunc func(context.Context, *ent.ParameterMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ParameterFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ParameterMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ParameterMutation", m)
 }
 
 // Condition is a hook condition function.

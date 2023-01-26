@@ -9,26 +9,22 @@ import (
 	"github.com/google/uuid"
 )
 
-type User struct {
+type Dataset struct {
 	ent.Schema
 }
 
-func (User) Fields() []ent.Field {
+func (Dataset) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
-		field.String("email").
-			Unique(),
+		field.String("name"),
 		field.Time("created_at").
 			Default(time.Now),
-		field.Time("updated_at").
-			Default(time.Now).
-			UpdateDefault(time.Now),
 	}
 }
 
-func (User) Edges() []ent.Edge {
+func (Dataset) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("files", File.Type),
+		edge.To("parameters", Parameter.Type),
 	}
 }

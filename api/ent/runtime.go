@@ -6,45 +6,44 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/file"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/schema"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	fileFields := schema.File{}.Fields()
-	_ = fileFields
-	// fileDescCreatedAt is the schema descriptor for created_at field.
-	fileDescCreatedAt := fileFields[4].Descriptor()
-	// file.DefaultCreatedAt holds the default value on creation for the created_at field.
-	file.DefaultCreatedAt = fileDescCreatedAt.Default.(func() time.Time)
-	// fileDescUpdatedAt is the schema descriptor for updated_at field.
-	fileDescUpdatedAt := fileFields[5].Descriptor()
-	// file.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	file.DefaultUpdatedAt = fileDescUpdatedAt.Default.(func() time.Time)
-	// file.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	file.UpdateDefaultUpdatedAt = fileDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// fileDescID is the schema descriptor for id field.
-	fileDescID := fileFields[0].Descriptor()
-	// file.DefaultID holds the default value on creation for the id field.
-	file.DefaultID = fileDescID.Default.(func() uuid.UUID)
-	userFields := schema.User{}.Fields()
-	_ = userFields
-	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[2].Descriptor()
-	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
-	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
-	// userDescUpdatedAt is the schema descriptor for updated_at field.
-	userDescUpdatedAt := userFields[3].Descriptor()
-	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
-	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// userDescID is the schema descriptor for id field.
-	userDescID := userFields[0].Descriptor()
-	// user.DefaultID holds the default value on creation for the id field.
-	user.DefaultID = userDescID.Default.(func() uuid.UUID)
+	datapointFields := schema.Datapoint{}.Fields()
+	_ = datapointFields
+	// datapointDescCreatedAt is the schema descriptor for created_at field.
+	datapointDescCreatedAt := datapointFields[4].Descriptor()
+	// datapoint.DefaultCreatedAt holds the default value on creation for the created_at field.
+	datapoint.DefaultCreatedAt = datapointDescCreatedAt.Default.(func() time.Time)
+	// datapointDescID is the schema descriptor for id field.
+	datapointDescID := datapointFields[0].Descriptor()
+	// datapoint.DefaultID holds the default value on creation for the id field.
+	datapoint.DefaultID = datapointDescID.Default.(func() uuid.UUID)
+	datasetFields := schema.Dataset{}.Fields()
+	_ = datasetFields
+	// datasetDescCreatedAt is the schema descriptor for created_at field.
+	datasetDescCreatedAt := datasetFields[2].Descriptor()
+	// dataset.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dataset.DefaultCreatedAt = datasetDescCreatedAt.Default.(func() time.Time)
+	// datasetDescID is the schema descriptor for id field.
+	datasetDescID := datasetFields[0].Descriptor()
+	// dataset.DefaultID holds the default value on creation for the id field.
+	dataset.DefaultID = datasetDescID.Default.(func() uuid.UUID)
+	parameterFields := schema.Parameter{}.Fields()
+	_ = parameterFields
+	// parameterDescCreatedAt is the schema descriptor for created_at field.
+	parameterDescCreatedAt := parameterFields[3].Descriptor()
+	// parameter.DefaultCreatedAt holds the default value on creation for the created_at field.
+	parameter.DefaultCreatedAt = parameterDescCreatedAt.Default.(func() time.Time)
+	// parameterDescID is the schema descriptor for id field.
+	parameterDescID := parameterFields[0].Descriptor()
+	// parameter.DefaultID holds the default value on creation for the id field.
+	parameter.DefaultID = parameterDescID.Default.(func() uuid.UUID)
 }

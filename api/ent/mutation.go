@@ -10,9 +10,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/file"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/predicate"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -27,40 +28,40 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeFile = "File"
-	TypeUser = "User"
+	TypeDatapoint = "Datapoint"
+	TypeDataset   = "Dataset"
+	TypeParameter = "Parameter"
 )
 
-// FileMutation represents an operation that mutates the File nodes in the graph.
-type FileMutation struct {
+// DatapointMutation represents an operation that mutates the Datapoint nodes in the graph.
+type DatapointMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	file_name     *string
-	file_size     *int64
-	addfile_size  *int64
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	user          *uuid.UUID
-	cleareduser   bool
-	done          bool
-	oldValue      func(context.Context) (*File, error)
-	predicates    []predicate.File
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	data_time         *time.Time
+	val               *float64
+	addval            *float64
+	created_at        *time.Time
+	clearedFields     map[string]struct{}
+	parameters        *uuid.UUID
+	clearedparameters bool
+	done              bool
+	oldValue          func(context.Context) (*Datapoint, error)
+	predicates        []predicate.Datapoint
 }
 
-var _ ent.Mutation = (*FileMutation)(nil)
+var _ ent.Mutation = (*DatapointMutation)(nil)
 
-// fileOption allows management of the mutation configuration using functional options.
-type fileOption func(*FileMutation)
+// datapointOption allows management of the mutation configuration using functional options.
+type datapointOption func(*DatapointMutation)
 
-// newFileMutation creates new mutation for the File entity.
-func newFileMutation(c config, op Op, opts ...fileOption) *FileMutation {
-	m := &FileMutation{
+// newDatapointMutation creates new mutation for the Datapoint entity.
+func newDatapointMutation(c config, op Op, opts ...datapointOption) *DatapointMutation {
+	m := &DatapointMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeFile,
+		typ:           TypeDatapoint,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -69,20 +70,20 @@ func newFileMutation(c config, op Op, opts ...fileOption) *FileMutation {
 	return m
 }
 
-// withFileID sets the ID field of the mutation.
-func withFileID(id uuid.UUID) fileOption {
-	return func(m *FileMutation) {
+// withDatapointID sets the ID field of the mutation.
+func withDatapointID(id uuid.UUID) datapointOption {
+	return func(m *DatapointMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *File
+			value *Datapoint
 		)
-		m.oldValue = func(ctx context.Context) (*File, error) {
+		m.oldValue = func(ctx context.Context) (*Datapoint, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().File.Get(ctx, id)
+					value, err = m.Client().Datapoint.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -91,10 +92,10 @@ func withFileID(id uuid.UUID) fileOption {
 	}
 }
 
-// withFile sets the old File of the mutation.
-func withFile(node *File) fileOption {
-	return func(m *FileMutation) {
-		m.oldValue = func(context.Context) (*File, error) {
+// withDatapoint sets the old Datapoint of the mutation.
+func withDatapoint(node *Datapoint) datapointOption {
+	return func(m *DatapointMutation) {
+		m.oldValue = func(context.Context) (*Datapoint, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -103,7 +104,7 @@ func withFile(node *File) fileOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m FileMutation) Client() *Client {
+func (m DatapointMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -111,7 +112,7 @@ func (m FileMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m FileMutation) Tx() (*Tx, error) {
+func (m DatapointMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -121,14 +122,14 @@ func (m FileMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of File entities.
-func (m *FileMutation) SetID(id uuid.UUID) {
+// operation is only accepted on creation of Datapoint entities.
+func (m *DatapointMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *FileMutation) ID() (id uuid.UUID, exists bool) {
+func (m *DatapointMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -139,7 +140,7 @@ func (m *FileMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *FileMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *DatapointMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -148,174 +149,160 @@ func (m *FileMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().File.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().Datapoint.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
-// SetUserID sets the "user_id" field.
-func (m *FileMutation) SetUserID(u uuid.UUID) {
-	m.user = &u
+// SetDataTime sets the "data_time" field.
+func (m *DatapointMutation) SetDataTime(t time.Time) {
+	m.data_time = &t
 }
 
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *FileMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user
+// DataTime returns the value of the "data_time" field in the mutation.
+func (m *DatapointMutation) DataTime() (r time.Time, exists bool) {
+	v := m.data_time
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldUserID returns the old "user_id" field's value of the File entity.
-// If the File object wasn't provided to the builder, the object is fetched from the database.
+// OldDataTime returns the old "data_time" field's value of the Datapoint entity.
+// If the Datapoint object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FileMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *DatapointMutation) OldDataTime(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+		return v, errors.New("OldDataTime is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
+		return v, errors.New("OldDataTime requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+		return v, fmt.Errorf("querying old value for OldDataTime: %w", err)
 	}
-	return oldValue.UserID, nil
+	return oldValue.DataTime, nil
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (m *FileMutation) ClearUserID() {
-	m.user = nil
-	m.clearedFields[file.FieldUserID] = struct{}{}
+// ResetDataTime resets all changes to the "data_time" field.
+func (m *DatapointMutation) ResetDataTime() {
+	m.data_time = nil
 }
 
-// UserIDCleared returns if the "user_id" field was cleared in this mutation.
-func (m *FileMutation) UserIDCleared() bool {
-	_, ok := m.clearedFields[file.FieldUserID]
+// SetParameterID sets the "parameter_id" field.
+func (m *DatapointMutation) SetParameterID(u uuid.UUID) {
+	m.parameters = &u
+}
+
+// ParameterID returns the value of the "parameter_id" field in the mutation.
+func (m *DatapointMutation) ParameterID() (r uuid.UUID, exists bool) {
+	v := m.parameters
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParameterID returns the old "parameter_id" field's value of the Datapoint entity.
+// If the Datapoint object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DatapointMutation) OldParameterID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParameterID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParameterID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParameterID: %w", err)
+	}
+	return oldValue.ParameterID, nil
+}
+
+// ClearParameterID clears the value of the "parameter_id" field.
+func (m *DatapointMutation) ClearParameterID() {
+	m.parameters = nil
+	m.clearedFields[datapoint.FieldParameterID] = struct{}{}
+}
+
+// ParameterIDCleared returns if the "parameter_id" field was cleared in this mutation.
+func (m *DatapointMutation) ParameterIDCleared() bool {
+	_, ok := m.clearedFields[datapoint.FieldParameterID]
 	return ok
 }
 
-// ResetUserID resets all changes to the "user_id" field.
-func (m *FileMutation) ResetUserID() {
-	m.user = nil
-	delete(m.clearedFields, file.FieldUserID)
+// ResetParameterID resets all changes to the "parameter_id" field.
+func (m *DatapointMutation) ResetParameterID() {
+	m.parameters = nil
+	delete(m.clearedFields, datapoint.FieldParameterID)
 }
 
-// SetFileName sets the "file_name" field.
-func (m *FileMutation) SetFileName(s string) {
-	m.file_name = &s
+// SetVal sets the "val" field.
+func (m *DatapointMutation) SetVal(f float64) {
+	m.val = &f
+	m.addval = nil
 }
 
-// FileName returns the value of the "file_name" field in the mutation.
-func (m *FileMutation) FileName() (r string, exists bool) {
-	v := m.file_name
+// Val returns the value of the "val" field in the mutation.
+func (m *DatapointMutation) Val() (r float64, exists bool) {
+	v := m.val
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldFileName returns the old "file_name" field's value of the File entity.
-// If the File object wasn't provided to the builder, the object is fetched from the database.
+// OldVal returns the old "val" field's value of the Datapoint entity.
+// If the Datapoint object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FileMutation) OldFileName(ctx context.Context) (v string, err error) {
+func (m *DatapointMutation) OldVal(ctx context.Context) (v float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFileName is only allowed on UpdateOne operations")
+		return v, errors.New("OldVal is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFileName requires an ID field in the mutation")
+		return v, errors.New("OldVal requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFileName: %w", err)
+		return v, fmt.Errorf("querying old value for OldVal: %w", err)
 	}
-	return oldValue.FileName, nil
+	return oldValue.Val, nil
 }
 
-// ResetFileName resets all changes to the "file_name" field.
-func (m *FileMutation) ResetFileName() {
-	m.file_name = nil
-}
-
-// SetFileSize sets the "file_size" field.
-func (m *FileMutation) SetFileSize(i int64) {
-	m.file_size = &i
-	m.addfile_size = nil
-}
-
-// FileSize returns the value of the "file_size" field in the mutation.
-func (m *FileMutation) FileSize() (r int64, exists bool) {
-	v := m.file_size
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFileSize returns the old "file_size" field's value of the File entity.
-// If the File object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FileMutation) OldFileSize(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFileSize is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFileSize requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFileSize: %w", err)
-	}
-	return oldValue.FileSize, nil
-}
-
-// AddFileSize adds i to the "file_size" field.
-func (m *FileMutation) AddFileSize(i int64) {
-	if m.addfile_size != nil {
-		*m.addfile_size += i
+// AddVal adds f to the "val" field.
+func (m *DatapointMutation) AddVal(f float64) {
+	if m.addval != nil {
+		*m.addval += f
 	} else {
-		m.addfile_size = &i
+		m.addval = &f
 	}
 }
 
-// AddedFileSize returns the value that was added to the "file_size" field in this mutation.
-func (m *FileMutation) AddedFileSize() (r int64, exists bool) {
-	v := m.addfile_size
+// AddedVal returns the value that was added to the "val" field in this mutation.
+func (m *DatapointMutation) AddedVal() (r float64, exists bool) {
+	v := m.addval
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ClearFileSize clears the value of the "file_size" field.
-func (m *FileMutation) ClearFileSize() {
-	m.file_size = nil
-	m.addfile_size = nil
-	m.clearedFields[file.FieldFileSize] = struct{}{}
-}
-
-// FileSizeCleared returns if the "file_size" field was cleared in this mutation.
-func (m *FileMutation) FileSizeCleared() bool {
-	_, ok := m.clearedFields[file.FieldFileSize]
-	return ok
-}
-
-// ResetFileSize resets all changes to the "file_size" field.
-func (m *FileMutation) ResetFileSize() {
-	m.file_size = nil
-	m.addfile_size = nil
-	delete(m.clearedFields, file.FieldFileSize)
+// ResetVal resets all changes to the "val" field.
+func (m *DatapointMutation) ResetVal() {
+	m.val = nil
+	m.addval = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *FileMutation) SetCreatedAt(t time.Time) {
+func (m *DatapointMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *FileMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *DatapointMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -323,10 +310,10 @@ func (m *FileMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the File entity.
-// If the File object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the Datapoint entity.
+// If the Datapoint object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FileMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *DatapointMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -341,81 +328,58 @@ func (m *FileMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *FileMutation) ResetCreatedAt() {
+func (m *DatapointMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (m *FileMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
+// SetParametersID sets the "parameters" edge to the Parameter entity by id.
+func (m *DatapointMutation) SetParametersID(id uuid.UUID) {
+	m.parameters = &id
 }
 
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *FileMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
+// ClearParameters clears the "parameters" edge to the Parameter entity.
+func (m *DatapointMutation) ClearParameters() {
+	m.clearedparameters = true
+}
+
+// ParametersCleared reports if the "parameters" edge to the Parameter entity was cleared.
+func (m *DatapointMutation) ParametersCleared() bool {
+	return m.ParameterIDCleared() || m.clearedparameters
+}
+
+// ParametersID returns the "parameters" edge ID in the mutation.
+func (m *DatapointMutation) ParametersID() (id uuid.UUID, exists bool) {
+	if m.parameters != nil {
+		return *m.parameters, true
 	}
-	return *v, true
+	return
 }
 
-// OldUpdatedAt returns the old "updated_at" field's value of the File entity.
-// If the File object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FileMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *FileMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (m *FileMutation) ClearUser() {
-	m.cleareduser = true
-}
-
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *FileMutation) UserCleared() bool {
-	return m.UserIDCleared() || m.cleareduser
-}
-
-// UserIDs returns the "user" edge IDs in the mutation.
+// ParametersIDs returns the "parameters" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *FileMutation) UserIDs() (ids []uuid.UUID) {
-	if id := m.user; id != nil {
+// ParametersID instead. It exists only for internal usage by the builders.
+func (m *DatapointMutation) ParametersIDs() (ids []uuid.UUID) {
+	if id := m.parameters; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetUser resets all changes to the "user" edge.
-func (m *FileMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
+// ResetParameters resets all changes to the "parameters" edge.
+func (m *DatapointMutation) ResetParameters() {
+	m.parameters = nil
+	m.clearedparameters = false
 }
 
-// Where appends a list predicates to the FileMutation builder.
-func (m *FileMutation) Where(ps ...predicate.File) {
+// Where appends a list predicates to the DatapointMutation builder.
+func (m *DatapointMutation) Where(ps ...predicate.Datapoint) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the FileMutation builder. Using this method,
+// WhereP appends storage-level predicates to the DatapointMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *FileMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.File, len(ps))
+func (m *DatapointMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Datapoint, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -423,39 +387,36 @@ func (m *FileMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *FileMutation) Op() Op {
+func (m *DatapointMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *FileMutation) SetOp(op Op) {
+func (m *DatapointMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (File).
-func (m *FileMutation) Type() string {
+// Type returns the node type of this mutation (Datapoint).
+func (m *DatapointMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *FileMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.user != nil {
-		fields = append(fields, file.FieldUserID)
+func (m *DatapointMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.data_time != nil {
+		fields = append(fields, datapoint.FieldDataTime)
 	}
-	if m.file_name != nil {
-		fields = append(fields, file.FieldFileName)
+	if m.parameters != nil {
+		fields = append(fields, datapoint.FieldParameterID)
 	}
-	if m.file_size != nil {
-		fields = append(fields, file.FieldFileSize)
+	if m.val != nil {
+		fields = append(fields, datapoint.FieldVal)
 	}
 	if m.created_at != nil {
-		fields = append(fields, file.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, file.FieldUpdatedAt)
+		fields = append(fields, datapoint.FieldCreatedAt)
 	}
 	return fields
 }
@@ -463,18 +424,16 @@ func (m *FileMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *FileMutation) Field(name string) (ent.Value, bool) {
+func (m *DatapointMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case file.FieldUserID:
-		return m.UserID()
-	case file.FieldFileName:
-		return m.FileName()
-	case file.FieldFileSize:
-		return m.FileSize()
-	case file.FieldCreatedAt:
+	case datapoint.FieldDataTime:
+		return m.DataTime()
+	case datapoint.FieldParameterID:
+		return m.ParameterID()
+	case datapoint.FieldVal:
+		return m.Val()
+	case datapoint.FieldCreatedAt:
 		return m.CreatedAt()
-	case file.FieldUpdatedAt:
-		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -482,72 +441,63 @@ func (m *FileMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *DatapointMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case file.FieldUserID:
-		return m.OldUserID(ctx)
-	case file.FieldFileName:
-		return m.OldFileName(ctx)
-	case file.FieldFileSize:
-		return m.OldFileSize(ctx)
-	case file.FieldCreatedAt:
+	case datapoint.FieldDataTime:
+		return m.OldDataTime(ctx)
+	case datapoint.FieldParameterID:
+		return m.OldParameterID(ctx)
+	case datapoint.FieldVal:
+		return m.OldVal(ctx)
+	case datapoint.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case file.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	}
-	return nil, fmt.Errorf("unknown File field %s", name)
+	return nil, fmt.Errorf("unknown Datapoint field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *FileMutation) SetField(name string, value ent.Value) error {
+func (m *DatapointMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case file.FieldUserID:
+	case datapoint.FieldDataTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDataTime(v)
+		return nil
+	case datapoint.FieldParameterID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetUserID(v)
+		m.SetParameterID(v)
 		return nil
-	case file.FieldFileName:
-		v, ok := value.(string)
+	case datapoint.FieldVal:
+		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetFileName(v)
+		m.SetVal(v)
 		return nil
-	case file.FieldFileSize:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFileSize(v)
-		return nil
-	case file.FieldCreatedAt:
+	case datapoint.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case file.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	}
-	return fmt.Errorf("unknown File field %s", name)
+	return fmt.Errorf("unknown Datapoint field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *FileMutation) AddedFields() []string {
+func (m *DatapointMutation) AddedFields() []string {
 	var fields []string
-	if m.addfile_size != nil {
-		fields = append(fields, file.FieldFileSize)
+	if m.addval != nil {
+		fields = append(fields, datapoint.FieldVal)
 	}
 	return fields
 }
@@ -555,10 +505,10 @@ func (m *FileMutation) AddedFields() []string {
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *FileMutation) AddedField(name string) (ent.Value, bool) {
+func (m *DatapointMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case file.FieldFileSize:
-		return m.AddedFileSize()
+	case datapoint.FieldVal:
+		return m.AddedVal()
 	}
 	return nil, false
 }
@@ -566,91 +516,82 @@ func (m *FileMutation) AddedField(name string) (ent.Value, bool) {
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *FileMutation) AddField(name string, value ent.Value) error {
+func (m *DatapointMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case file.FieldFileSize:
-		v, ok := value.(int64)
+	case datapoint.FieldVal:
+		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddFileSize(v)
+		m.AddVal(v)
 		return nil
 	}
-	return fmt.Errorf("unknown File numeric field %s", name)
+	return fmt.Errorf("unknown Datapoint numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *FileMutation) ClearedFields() []string {
+func (m *DatapointMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(file.FieldUserID) {
-		fields = append(fields, file.FieldUserID)
-	}
-	if m.FieldCleared(file.FieldFileSize) {
-		fields = append(fields, file.FieldFileSize)
+	if m.FieldCleared(datapoint.FieldParameterID) {
+		fields = append(fields, datapoint.FieldParameterID)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *FileMutation) FieldCleared(name string) bool {
+func (m *DatapointMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *FileMutation) ClearField(name string) error {
+func (m *DatapointMutation) ClearField(name string) error {
 	switch name {
-	case file.FieldUserID:
-		m.ClearUserID()
-		return nil
-	case file.FieldFileSize:
-		m.ClearFileSize()
+	case datapoint.FieldParameterID:
+		m.ClearParameterID()
 		return nil
 	}
-	return fmt.Errorf("unknown File nullable field %s", name)
+	return fmt.Errorf("unknown Datapoint nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *FileMutation) ResetField(name string) error {
+func (m *DatapointMutation) ResetField(name string) error {
 	switch name {
-	case file.FieldUserID:
-		m.ResetUserID()
+	case datapoint.FieldDataTime:
+		m.ResetDataTime()
 		return nil
-	case file.FieldFileName:
-		m.ResetFileName()
+	case datapoint.FieldParameterID:
+		m.ResetParameterID()
 		return nil
-	case file.FieldFileSize:
-		m.ResetFileSize()
+	case datapoint.FieldVal:
+		m.ResetVal()
 		return nil
-	case file.FieldCreatedAt:
+	case datapoint.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case file.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	}
-	return fmt.Errorf("unknown File field %s", name)
+	return fmt.Errorf("unknown Datapoint field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *FileMutation) AddedEdges() []string {
+func (m *DatapointMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.user != nil {
-		edges = append(edges, file.EdgeUser)
+	if m.parameters != nil {
+		edges = append(edges, datapoint.EdgeParameters)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *FileMutation) AddedIDs(name string) []ent.Value {
+func (m *DatapointMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case file.EdgeUser:
-		if id := m.user; id != nil {
+	case datapoint.EdgeParameters:
+		if id := m.parameters; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -658,87 +599,86 @@ func (m *FileMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *FileMutation) RemovedEdges() []string {
+func (m *DatapointMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *FileMutation) RemovedIDs(name string) []ent.Value {
+func (m *DatapointMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *FileMutation) ClearedEdges() []string {
+func (m *DatapointMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.cleareduser {
-		edges = append(edges, file.EdgeUser)
+	if m.clearedparameters {
+		edges = append(edges, datapoint.EdgeParameters)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *FileMutation) EdgeCleared(name string) bool {
+func (m *DatapointMutation) EdgeCleared(name string) bool {
 	switch name {
-	case file.EdgeUser:
-		return m.cleareduser
+	case datapoint.EdgeParameters:
+		return m.clearedparameters
 	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *FileMutation) ClearEdge(name string) error {
+func (m *DatapointMutation) ClearEdge(name string) error {
 	switch name {
-	case file.EdgeUser:
-		m.ClearUser()
+	case datapoint.EdgeParameters:
+		m.ClearParameters()
 		return nil
 	}
-	return fmt.Errorf("unknown File unique edge %s", name)
+	return fmt.Errorf("unknown Datapoint unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *FileMutation) ResetEdge(name string) error {
+func (m *DatapointMutation) ResetEdge(name string) error {
 	switch name {
-	case file.EdgeUser:
-		m.ResetUser()
+	case datapoint.EdgeParameters:
+		m.ResetParameters()
 		return nil
 	}
-	return fmt.Errorf("unknown File edge %s", name)
+	return fmt.Errorf("unknown Datapoint edge %s", name)
 }
 
-// UserMutation represents an operation that mutates the User nodes in the graph.
-type UserMutation struct {
+// DatasetMutation represents an operation that mutates the Dataset nodes in the graph.
+type DatasetMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	email         *string
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	files         map[uuid.UUID]struct{}
-	removedfiles  map[uuid.UUID]struct{}
-	clearedfiles  bool
-	done          bool
-	oldValue      func(context.Context) (*User, error)
-	predicates    []predicate.User
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	name              *string
+	created_at        *time.Time
+	clearedFields     map[string]struct{}
+	parameters        map[uuid.UUID]struct{}
+	removedparameters map[uuid.UUID]struct{}
+	clearedparameters bool
+	done              bool
+	oldValue          func(context.Context) (*Dataset, error)
+	predicates        []predicate.Dataset
 }
 
-var _ ent.Mutation = (*UserMutation)(nil)
+var _ ent.Mutation = (*DatasetMutation)(nil)
 
-// userOption allows management of the mutation configuration using functional options.
-type userOption func(*UserMutation)
+// datasetOption allows management of the mutation configuration using functional options.
+type datasetOption func(*DatasetMutation)
 
-// newUserMutation creates new mutation for the User entity.
-func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
-	m := &UserMutation{
+// newDatasetMutation creates new mutation for the Dataset entity.
+func newDatasetMutation(c config, op Op, opts ...datasetOption) *DatasetMutation {
+	m := &DatasetMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeUser,
+		typ:           TypeDataset,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -747,20 +687,20 @@ func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	return m
 }
 
-// withUserID sets the ID field of the mutation.
-func withUserID(id uuid.UUID) userOption {
-	return func(m *UserMutation) {
+// withDatasetID sets the ID field of the mutation.
+func withDatasetID(id uuid.UUID) datasetOption {
+	return func(m *DatasetMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *User
+			value *Dataset
 		)
-		m.oldValue = func(ctx context.Context) (*User, error) {
+		m.oldValue = func(ctx context.Context) (*Dataset, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().User.Get(ctx, id)
+					value, err = m.Client().Dataset.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -769,10 +709,10 @@ func withUserID(id uuid.UUID) userOption {
 	}
 }
 
-// withUser sets the old User of the mutation.
-func withUser(node *User) userOption {
-	return func(m *UserMutation) {
-		m.oldValue = func(context.Context) (*User, error) {
+// withDataset sets the old Dataset of the mutation.
+func withDataset(node *Dataset) datasetOption {
+	return func(m *DatasetMutation) {
+		m.oldValue = func(context.Context) (*Dataset, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -781,7 +721,7 @@ func withUser(node *User) userOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m UserMutation) Client() *Client {
+func (m DatasetMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -789,7 +729,7 @@ func (m UserMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m UserMutation) Tx() (*Tx, error) {
+func (m DatasetMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -799,14 +739,14 @@ func (m UserMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of User entities.
-func (m *UserMutation) SetID(id uuid.UUID) {
+// operation is only accepted on creation of Dataset entities.
+func (m *DatasetMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
+func (m *DatasetMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -817,7 +757,7 @@ func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *UserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *DatasetMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -826,55 +766,55 @@ func (m *UserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().User.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().Dataset.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
-// SetEmail sets the "email" field.
-func (m *UserMutation) SetEmail(s string) {
-	m.email = &s
+// SetName sets the "name" field.
+func (m *DatasetMutation) SetName(s string) {
+	m.name = &s
 }
 
-// Email returns the value of the "email" field in the mutation.
-func (m *UserMutation) Email() (r string, exists bool) {
-	v := m.email
+// Name returns the value of the "name" field in the mutation.
+func (m *DatasetMutation) Name() (r string, exists bool) {
+	v := m.name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldEmail returns the old "email" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
+// OldName returns the old "name" field's value of the Dataset entity.
+// If the Dataset object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldEmail(ctx context.Context) (v string, err error) {
+func (m *DatasetMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEmail is only allowed on UpdateOne operations")
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEmail requires an ID field in the mutation")
+		return v, errors.New("OldName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEmail: %w", err)
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
 	}
-	return oldValue.Email, nil
+	return oldValue.Name, nil
 }
 
-// ResetEmail resets all changes to the "email" field.
-func (m *UserMutation) ResetEmail() {
-	m.email = nil
+// ResetName resets all changes to the "name" field.
+func (m *DatasetMutation) ResetName() {
+	m.name = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *UserMutation) SetCreatedAt(t time.Time) {
+func (m *DatasetMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *UserMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *DatasetMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -882,10 +822,10 @@ func (m *UserMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the Dataset entity.
+// If the Dataset object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *DatasetMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -900,109 +840,73 @@ func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *UserMutation) ResetCreatedAt() {
+func (m *DatasetMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (m *UserMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *UserMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// AddFileIDs adds the "files" edge to the File entity by ids.
-func (m *UserMutation) AddFileIDs(ids ...uuid.UUID) {
-	if m.files == nil {
-		m.files = make(map[uuid.UUID]struct{})
+// AddParameterIDs adds the "parameters" edge to the Parameter entity by ids.
+func (m *DatasetMutation) AddParameterIDs(ids ...uuid.UUID) {
+	if m.parameters == nil {
+		m.parameters = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.files[ids[i]] = struct{}{}
+		m.parameters[ids[i]] = struct{}{}
 	}
 }
 
-// ClearFiles clears the "files" edge to the File entity.
-func (m *UserMutation) ClearFiles() {
-	m.clearedfiles = true
+// ClearParameters clears the "parameters" edge to the Parameter entity.
+func (m *DatasetMutation) ClearParameters() {
+	m.clearedparameters = true
 }
 
-// FilesCleared reports if the "files" edge to the File entity was cleared.
-func (m *UserMutation) FilesCleared() bool {
-	return m.clearedfiles
+// ParametersCleared reports if the "parameters" edge to the Parameter entity was cleared.
+func (m *DatasetMutation) ParametersCleared() bool {
+	return m.clearedparameters
 }
 
-// RemoveFileIDs removes the "files" edge to the File entity by IDs.
-func (m *UserMutation) RemoveFileIDs(ids ...uuid.UUID) {
-	if m.removedfiles == nil {
-		m.removedfiles = make(map[uuid.UUID]struct{})
+// RemoveParameterIDs removes the "parameters" edge to the Parameter entity by IDs.
+func (m *DatasetMutation) RemoveParameterIDs(ids ...uuid.UUID) {
+	if m.removedparameters == nil {
+		m.removedparameters = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.files, ids[i])
-		m.removedfiles[ids[i]] = struct{}{}
+		delete(m.parameters, ids[i])
+		m.removedparameters[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedFiles returns the removed IDs of the "files" edge to the File entity.
-func (m *UserMutation) RemovedFilesIDs() (ids []uuid.UUID) {
-	for id := range m.removedfiles {
+// RemovedParameters returns the removed IDs of the "parameters" edge to the Parameter entity.
+func (m *DatasetMutation) RemovedParametersIDs() (ids []uuid.UUID) {
+	for id := range m.removedparameters {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// FilesIDs returns the "files" edge IDs in the mutation.
-func (m *UserMutation) FilesIDs() (ids []uuid.UUID) {
-	for id := range m.files {
+// ParametersIDs returns the "parameters" edge IDs in the mutation.
+func (m *DatasetMutation) ParametersIDs() (ids []uuid.UUID) {
+	for id := range m.parameters {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetFiles resets all changes to the "files" edge.
-func (m *UserMutation) ResetFiles() {
-	m.files = nil
-	m.clearedfiles = false
-	m.removedfiles = nil
+// ResetParameters resets all changes to the "parameters" edge.
+func (m *DatasetMutation) ResetParameters() {
+	m.parameters = nil
+	m.clearedparameters = false
+	m.removedparameters = nil
 }
 
-// Where appends a list predicates to the UserMutation builder.
-func (m *UserMutation) Where(ps ...predicate.User) {
+// Where appends a list predicates to the DatasetMutation builder.
+func (m *DatasetMutation) Where(ps ...predicate.Dataset) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the UserMutation builder. Using this method,
+// WhereP appends storage-level predicates to the DatasetMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *UserMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.User, len(ps))
+func (m *DatasetMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Dataset, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -1010,33 +914,30 @@ func (m *UserMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *UserMutation) Op() Op {
+func (m *DatasetMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *UserMutation) SetOp(op Op) {
+func (m *DatasetMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (User).
-func (m *UserMutation) Type() string {
+// Type returns the node type of this mutation (Dataset).
+func (m *DatasetMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.email != nil {
-		fields = append(fields, user.FieldEmail)
+func (m *DatasetMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.name != nil {
+		fields = append(fields, dataset.FieldName)
 	}
 	if m.created_at != nil {
-		fields = append(fields, user.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, user.FieldUpdatedAt)
+		fields = append(fields, dataset.FieldCreatedAt)
 	}
 	return fields
 }
@@ -1044,14 +945,12 @@ func (m *UserMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *UserMutation) Field(name string) (ent.Value, bool) {
+func (m *DatasetMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case user.FieldEmail:
-		return m.Email()
-	case user.FieldCreatedAt:
+	case dataset.FieldName:
+		return m.Name()
+	case dataset.FieldCreatedAt:
 		return m.CreatedAt()
-	case user.FieldUpdatedAt:
-		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -1059,122 +958,110 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *DatasetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case user.FieldEmail:
-		return m.OldEmail(ctx)
-	case user.FieldCreatedAt:
+	case dataset.FieldName:
+		return m.OldName(ctx)
+	case dataset.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case user.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	}
-	return nil, fmt.Errorf("unknown User field %s", name)
+	return nil, fmt.Errorf("unknown Dataset field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *UserMutation) SetField(name string, value ent.Value) error {
+func (m *DatasetMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case user.FieldEmail:
+	case dataset.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetEmail(v)
+		m.SetName(v)
 		return nil
-	case user.FieldCreatedAt:
+	case dataset.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case user.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	}
-	return fmt.Errorf("unknown User field %s", name)
+	return fmt.Errorf("unknown Dataset field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *UserMutation) AddedFields() []string {
+func (m *DatasetMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
+func (m *DatasetMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *UserMutation) AddField(name string, value ent.Value) error {
+func (m *DatasetMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown User numeric field %s", name)
+	return fmt.Errorf("unknown Dataset numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *UserMutation) ClearedFields() []string {
+func (m *DatasetMutation) ClearedFields() []string {
 	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *UserMutation) FieldCleared(name string) bool {
+func (m *DatasetMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *UserMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown User nullable field %s", name)
+func (m *DatasetMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Dataset nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *UserMutation) ResetField(name string) error {
+func (m *DatasetMutation) ResetField(name string) error {
 	switch name {
-	case user.FieldEmail:
-		m.ResetEmail()
+	case dataset.FieldName:
+		m.ResetName()
 		return nil
-	case user.FieldCreatedAt:
+	case dataset.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case user.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	}
-	return fmt.Errorf("unknown User field %s", name)
+	return fmt.Errorf("unknown Dataset field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *UserMutation) AddedEdges() []string {
+func (m *DatasetMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.files != nil {
-		edges = append(edges, user.EdgeFiles)
+	if m.parameters != nil {
+		edges = append(edges, dataset.EdgeParameters)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *UserMutation) AddedIDs(name string) []ent.Value {
+func (m *DatasetMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeFiles:
-		ids := make([]ent.Value, 0, len(m.files))
-		for id := range m.files {
+	case dataset.EdgeParameters:
+		ids := make([]ent.Value, 0, len(m.parameters))
+		for id := range m.parameters {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1183,21 +1070,21 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *UserMutation) RemovedEdges() []string {
+func (m *DatasetMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedfiles != nil {
-		edges = append(edges, user.EdgeFiles)
+	if m.removedparameters != nil {
+		edges = append(edges, dataset.EdgeParameters)
 	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *UserMutation) RemovedIDs(name string) []ent.Value {
+func (m *DatasetMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeFiles:
-		ids := make([]ent.Value, 0, len(m.removedfiles))
-		for id := range m.removedfiles {
+	case dataset.EdgeParameters:
+		ids := make([]ent.Value, 0, len(m.removedparameters))
+		for id := range m.removedparameters {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1206,39 +1093,652 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *UserMutation) ClearedEdges() []string {
+func (m *DatasetMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedfiles {
-		edges = append(edges, user.EdgeFiles)
+	if m.clearedparameters {
+		edges = append(edges, dataset.EdgeParameters)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *UserMutation) EdgeCleared(name string) bool {
+func (m *DatasetMutation) EdgeCleared(name string) bool {
 	switch name {
-	case user.EdgeFiles:
-		return m.clearedfiles
+	case dataset.EdgeParameters:
+		return m.clearedparameters
 	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *UserMutation) ClearEdge(name string) error {
+func (m *DatasetMutation) ClearEdge(name string) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown User unique edge %s", name)
+	return fmt.Errorf("unknown Dataset unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *UserMutation) ResetEdge(name string) error {
+func (m *DatasetMutation) ResetEdge(name string) error {
 	switch name {
-	case user.EdgeFiles:
-		m.ResetFiles()
+	case dataset.EdgeParameters:
+		m.ResetParameters()
 		return nil
 	}
-	return fmt.Errorf("unknown User edge %s", name)
+	return fmt.Errorf("unknown Dataset edge %s", name)
+}
+
+// ParameterMutation represents an operation that mutates the Parameter nodes in the graph.
+type ParameterMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	name              *string
+	created_at        *time.Time
+	clearedFields     map[string]struct{}
+	datasets          *uuid.UUID
+	cleareddatasets   bool
+	datapoints        map[uuid.UUID]struct{}
+	removeddatapoints map[uuid.UUID]struct{}
+	cleareddatapoints bool
+	done              bool
+	oldValue          func(context.Context) (*Parameter, error)
+	predicates        []predicate.Parameter
+}
+
+var _ ent.Mutation = (*ParameterMutation)(nil)
+
+// parameterOption allows management of the mutation configuration using functional options.
+type parameterOption func(*ParameterMutation)
+
+// newParameterMutation creates new mutation for the Parameter entity.
+func newParameterMutation(c config, op Op, opts ...parameterOption) *ParameterMutation {
+	m := &ParameterMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeParameter,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withParameterID sets the ID field of the mutation.
+func withParameterID(id uuid.UUID) parameterOption {
+	return func(m *ParameterMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Parameter
+		)
+		m.oldValue = func(ctx context.Context) (*Parameter, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Parameter.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withParameter sets the old Parameter of the mutation.
+func withParameter(node *Parameter) parameterOption {
+	return func(m *ParameterMutation) {
+		m.oldValue = func(context.Context) (*Parameter, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ParameterMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ParameterMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Parameter entities.
+func (m *ParameterMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ParameterMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ParameterMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Parameter.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *ParameterMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *ParameterMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Parameter entity.
+// If the Parameter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ParameterMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *ParameterMutation) ResetName() {
+	m.name = nil
+}
+
+// SetDatasetID sets the "dataset_id" field.
+func (m *ParameterMutation) SetDatasetID(u uuid.UUID) {
+	m.datasets = &u
+}
+
+// DatasetID returns the value of the "dataset_id" field in the mutation.
+func (m *ParameterMutation) DatasetID() (r uuid.UUID, exists bool) {
+	v := m.datasets
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDatasetID returns the old "dataset_id" field's value of the Parameter entity.
+// If the Parameter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ParameterMutation) OldDatasetID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDatasetID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDatasetID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDatasetID: %w", err)
+	}
+	return oldValue.DatasetID, nil
+}
+
+// ClearDatasetID clears the value of the "dataset_id" field.
+func (m *ParameterMutation) ClearDatasetID() {
+	m.datasets = nil
+	m.clearedFields[parameter.FieldDatasetID] = struct{}{}
+}
+
+// DatasetIDCleared returns if the "dataset_id" field was cleared in this mutation.
+func (m *ParameterMutation) DatasetIDCleared() bool {
+	_, ok := m.clearedFields[parameter.FieldDatasetID]
+	return ok
+}
+
+// ResetDatasetID resets all changes to the "dataset_id" field.
+func (m *ParameterMutation) ResetDatasetID() {
+	m.datasets = nil
+	delete(m.clearedFields, parameter.FieldDatasetID)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ParameterMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ParameterMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Parameter entity.
+// If the Parameter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ParameterMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ParameterMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetDatasetsID sets the "datasets" edge to the Dataset entity by id.
+func (m *ParameterMutation) SetDatasetsID(id uuid.UUID) {
+	m.datasets = &id
+}
+
+// ClearDatasets clears the "datasets" edge to the Dataset entity.
+func (m *ParameterMutation) ClearDatasets() {
+	m.cleareddatasets = true
+}
+
+// DatasetsCleared reports if the "datasets" edge to the Dataset entity was cleared.
+func (m *ParameterMutation) DatasetsCleared() bool {
+	return m.DatasetIDCleared() || m.cleareddatasets
+}
+
+// DatasetsID returns the "datasets" edge ID in the mutation.
+func (m *ParameterMutation) DatasetsID() (id uuid.UUID, exists bool) {
+	if m.datasets != nil {
+		return *m.datasets, true
+	}
+	return
+}
+
+// DatasetsIDs returns the "datasets" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DatasetsID instead. It exists only for internal usage by the builders.
+func (m *ParameterMutation) DatasetsIDs() (ids []uuid.UUID) {
+	if id := m.datasets; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDatasets resets all changes to the "datasets" edge.
+func (m *ParameterMutation) ResetDatasets() {
+	m.datasets = nil
+	m.cleareddatasets = false
+}
+
+// AddDatapointIDs adds the "datapoints" edge to the Datapoint entity by ids.
+func (m *ParameterMutation) AddDatapointIDs(ids ...uuid.UUID) {
+	if m.datapoints == nil {
+		m.datapoints = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.datapoints[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDatapoints clears the "datapoints" edge to the Datapoint entity.
+func (m *ParameterMutation) ClearDatapoints() {
+	m.cleareddatapoints = true
+}
+
+// DatapointsCleared reports if the "datapoints" edge to the Datapoint entity was cleared.
+func (m *ParameterMutation) DatapointsCleared() bool {
+	return m.cleareddatapoints
+}
+
+// RemoveDatapointIDs removes the "datapoints" edge to the Datapoint entity by IDs.
+func (m *ParameterMutation) RemoveDatapointIDs(ids ...uuid.UUID) {
+	if m.removeddatapoints == nil {
+		m.removeddatapoints = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.datapoints, ids[i])
+		m.removeddatapoints[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDatapoints returns the removed IDs of the "datapoints" edge to the Datapoint entity.
+func (m *ParameterMutation) RemovedDatapointsIDs() (ids []uuid.UUID) {
+	for id := range m.removeddatapoints {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DatapointsIDs returns the "datapoints" edge IDs in the mutation.
+func (m *ParameterMutation) DatapointsIDs() (ids []uuid.UUID) {
+	for id := range m.datapoints {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDatapoints resets all changes to the "datapoints" edge.
+func (m *ParameterMutation) ResetDatapoints() {
+	m.datapoints = nil
+	m.cleareddatapoints = false
+	m.removeddatapoints = nil
+}
+
+// Where appends a list predicates to the ParameterMutation builder.
+func (m *ParameterMutation) Where(ps ...predicate.Parameter) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ParameterMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ParameterMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Parameter, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ParameterMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ParameterMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Parameter).
+func (m *ParameterMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ParameterMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.name != nil {
+		fields = append(fields, parameter.FieldName)
+	}
+	if m.datasets != nil {
+		fields = append(fields, parameter.FieldDatasetID)
+	}
+	if m.created_at != nil {
+		fields = append(fields, parameter.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ParameterMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case parameter.FieldName:
+		return m.Name()
+	case parameter.FieldDatasetID:
+		return m.DatasetID()
+	case parameter.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ParameterMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case parameter.FieldName:
+		return m.OldName(ctx)
+	case parameter.FieldDatasetID:
+		return m.OldDatasetID(ctx)
+	case parameter.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown Parameter field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ParameterMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case parameter.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case parameter.FieldDatasetID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDatasetID(v)
+		return nil
+	case parameter.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Parameter field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ParameterMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ParameterMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ParameterMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Parameter numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ParameterMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(parameter.FieldDatasetID) {
+		fields = append(fields, parameter.FieldDatasetID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ParameterMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ParameterMutation) ClearField(name string) error {
+	switch name {
+	case parameter.FieldDatasetID:
+		m.ClearDatasetID()
+		return nil
+	}
+	return fmt.Errorf("unknown Parameter nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ParameterMutation) ResetField(name string) error {
+	switch name {
+	case parameter.FieldName:
+		m.ResetName()
+		return nil
+	case parameter.FieldDatasetID:
+		m.ResetDatasetID()
+		return nil
+	case parameter.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Parameter field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ParameterMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.datasets != nil {
+		edges = append(edges, parameter.EdgeDatasets)
+	}
+	if m.datapoints != nil {
+		edges = append(edges, parameter.EdgeDatapoints)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ParameterMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case parameter.EdgeDatasets:
+		if id := m.datasets; id != nil {
+			return []ent.Value{*id}
+		}
+	case parameter.EdgeDatapoints:
+		ids := make([]ent.Value, 0, len(m.datapoints))
+		for id := range m.datapoints {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ParameterMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removeddatapoints != nil {
+		edges = append(edges, parameter.EdgeDatapoints)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ParameterMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case parameter.EdgeDatapoints:
+		ids := make([]ent.Value, 0, len(m.removeddatapoints))
+		for id := range m.removeddatapoints {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ParameterMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.cleareddatasets {
+		edges = append(edges, parameter.EdgeDatasets)
+	}
+	if m.cleareddatapoints {
+		edges = append(edges, parameter.EdgeDatapoints)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ParameterMutation) EdgeCleared(name string) bool {
+	switch name {
+	case parameter.EdgeDatasets:
+		return m.cleareddatasets
+	case parameter.EdgeDatapoints:
+		return m.cleareddatapoints
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ParameterMutation) ClearEdge(name string) error {
+	switch name {
+	case parameter.EdgeDatasets:
+		m.ClearDatasets()
+		return nil
+	}
+	return fmt.Errorf("unknown Parameter unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ParameterMutation) ResetEdge(name string) error {
+	switch name {
+	case parameter.EdgeDatasets:
+		m.ResetDatasets()
+		return nil
+	case parameter.EdgeDatapoints:
+		m.ResetDatapoints()
+		return nil
+	}
+	return fmt.Errorf("unknown Parameter edge %s", name)
 }

@@ -8,49 +8,70 @@ import (
 )
 
 var (
-	// FilesColumns holds the columns for the "files" table.
-	FilesColumns = []*schema.Column{
+	// DatapointsColumns holds the columns for the "datapoints" table.
+	DatapointsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "file_name", Type: field.TypeString},
-		{Name: "file_size", Type: field.TypeInt64, Nullable: true},
+		{Name: "data_time", Type: field.TypeTime},
+		{Name: "val", Type: field.TypeFloat64},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "parameter_id", Type: field.TypeUUID, Nullable: true},
 	}
-	// FilesTable holds the schema information for the "files" table.
-	FilesTable = &schema.Table{
-		Name:       "files",
-		Columns:    FilesColumns,
-		PrimaryKey: []*schema.Column{FilesColumns[0]},
+	// DatapointsTable holds the schema information for the "datapoints" table.
+	DatapointsTable = &schema.Table{
+		Name:       "datapoints",
+		Columns:    DatapointsColumns,
+		PrimaryKey: []*schema.Column{DatapointsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_users_files",
-				Columns:    []*schema.Column{FilesColumns[5]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				Symbol:     "datapoints_parameters_datapoints",
+				Columns:    []*schema.Column{DatapointsColumns[4]},
+				RefColumns: []*schema.Column{ParametersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
-	// UsersColumns holds the columns for the "users" table.
-	UsersColumns = []*schema.Column{
+	// DatasetsColumns holds the columns for the "datasets" table.
+	DatasetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 	}
-	// UsersTable holds the schema information for the "users" table.
-	UsersTable = &schema.Table{
-		Name:       "users",
-		Columns:    UsersColumns,
-		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	// DatasetsTable holds the schema information for the "datasets" table.
+	DatasetsTable = &schema.Table{
+		Name:       "datasets",
+		Columns:    DatasetsColumns,
+		PrimaryKey: []*schema.Column{DatasetsColumns[0]},
+	}
+	// ParametersColumns holds the columns for the "parameters" table.
+	ParametersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "dataset_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// ParametersTable holds the schema information for the "parameters" table.
+	ParametersTable = &schema.Table{
+		Name:       "parameters",
+		Columns:    ParametersColumns,
+		PrimaryKey: []*schema.Column{ParametersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "parameters_datasets_parameters",
+				Columns:    []*schema.Column{ParametersColumns[3]},
+				RefColumns: []*schema.Column{DatasetsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		FilesTable,
-		UsersTable,
+		DatapointsTable,
+		DatasetsTable,
+		ParametersTable,
 	}
 )
 
 func init() {
-	FilesTable.ForeignKeys[0].RefTable = UsersTable
+	DatapointsTable.ForeignKeys[0].RefTable = ParametersTable
+	ParametersTable.ForeignKeys[0].RefTable = DatasetsTable
 }

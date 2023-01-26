@@ -11,8 +11,9 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/file"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/user"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -40,8 +41,9 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		file.Table: file.ValidColumn,
-		user.Table: user.ValidColumn,
+		datapoint.Table: datapoint.ValidColumn,
+		dataset.Table:   dataset.ValidColumn,
+		parameter.Table: parameter.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
