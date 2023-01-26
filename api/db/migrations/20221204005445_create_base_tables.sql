@@ -1,8 +1,5 @@
 -- +goose Up
 -- +goose StatementBegin
-SELECT
-    'up SQL query';
-
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE datasets (
@@ -11,11 +8,18 @@ CREATE TABLE datasets (
     created_at timestamptz
 );
 
+CREATE TABLE parameters(
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR,
+    dataset_id uuid references datasets(id),
+    created_at timestamptz
+);
+
 CREATE TABLE datapoints (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     data_time timestamptz,
+    parameter_id uuid references parameters(id),
     val double precision,
-    dataset_id uuid references datasets(id),
     created_at timestamptz
 );
 
@@ -38,8 +42,10 @@ CREATE TABLE datapoints (
 SELECT
     'down SQL query';
 
-DELETE TABLE datasets;
-
 DELETE TABLE datapoints;
+
+DELETE TABLE parameters;
+
+DELETE TABLE datasets;
 
 -- +goose StatementEnd
