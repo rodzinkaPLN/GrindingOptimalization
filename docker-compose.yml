@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:14.3
+    ports:
+      - "5432:5432"
+    restart: always
+    env_file: api/.env
+    command: [ "postgres", "-c", "log_statement=all" ]
+  # api:
+  #   build:
+  #     dockerfile: Dockerfile.dev
+  #     context: ./api
+  #   env_file: api/.env
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - "./api:/go/src/github.com/rodzinkaPLN/GrindingOptimalization/api"
+  #   depends_on:
+  #     - postgres
+  # web:
+  #   build:
+  #     dockerfile: Dockerfile.dev
+  #     context: ./web
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - "./web:/web"
