@@ -1,7 +1,7 @@
 import CircularProgress from "@mui/material/CircularProgress";
 import React, { useEffect, useState } from 'react';
 import {
-    Area, AreaChart, Brush, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis,
+    Line, LineChart, Tooltip, XAxis,
     YAxis
 } from 'recharts';
 
@@ -39,7 +39,6 @@ const Chart = () => {
         };
 
         dataFetch();
-        console.log(data)
     }, []);
 
 
