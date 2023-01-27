@@ -18,6 +18,7 @@ func (Parameter) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
 		field.String("name"),
+		field.String("unit"),
 		field.UUID("dataset_id", uuid.UUID{}).
 			Optional(),
 		field.Time("created_at").

@@ -12,6 +12,7 @@ CREATE TABLE parameters(
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR,
     dataset_id uuid references datasets(id),
+    unit VARCHAR,
     created_at timestamptz
 );
 
