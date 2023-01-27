@@ -58,7 +58,7 @@ const Chart = () => {
         const dataFetch = async () => {
             const data = await (
                 await fetch(
-                    "http://localhost:8080/api/v1/data"
+                    "http://localhost:8080/api/v1/data?parameters=drgania"
                 )
             ).json();
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/db"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/model"
 )
@@ -43,11 +44,15 @@ func (h *CrudHandler) GetDataPoints(c echo.Context) error {
 
 	parameters, err := h.db.Parameter.Query().Where(
 		parameter.NameIn(req.Parameters...),
-	).WithDatapoints().
+	).WithDatapoints(
+		func(q *ent.DatapointQuery) {
+			q.Limit(100)
+		},
+	).
 		All(ctx)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, model.ParametersFromEntParameters(parameters))
+	return c.JSON(http.StatusOK, model.ParametersFromEntParameters(parameters))
 }
