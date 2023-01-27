@@ -1,11 +1,9 @@
-import React from 'react';
+import CircularProgress from "@mui/material/CircularProgress";
+import React, { useEffect, useState } from 'react';
 import {
-    CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis,
+    Area, AreaChart, Brush, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis,
     YAxis
 } from 'recharts';
-import { useState, useEffect } from 'react';
-import CircularProgress from "@mui/material/CircularProgress"
-import randomColor from "randomcolor";
 
 const Chart = () => {
     const [data, setData] = useState([]);
@@ -31,19 +29,24 @@ const Chart = () => {
         return <CircularProgress />
     }
     return (
-        <LineChart width={width / 2} height={height / 2} data={data.data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="ts" padding={{ left: 30, right: 30 }} />
-            <YAxis />
-            <Tooltip />
-            <Legend />
+        <div>
             {
-                data.parameters.map(d => (
-                    <Line type="natural" dataKey={d.key} name={d.name} stroke={randomColor()} activeDot={{ r: 8 }} />
+                data.parameters.map(param => (
+                    <LineChart
+                        width={width / 2}
+                        height={height / 4}
+                        data={data.data}
+                        syncId="anyId"
+                    >
+                        <XAxis dataKey="ts" />
+                        <YAxis />
+                        <Tooltip />
+
+                        <Line type="monotone" dataKey={param.key} stroke="#8884d8" activeDot={{ r: 8 }} />
+                    </LineChart>
                 ))
             }
-        </LineChart>
-    );
+        </div>)
 }
 
 export default Chart;
