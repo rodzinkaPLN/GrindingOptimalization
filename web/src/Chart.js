@@ -15,11 +15,11 @@ const Chart = (props) => {
             return (
                 <div className="custom-tooltip">
                     {Object.entries(payload[0].payload).
-                        filter(v => props.pickedParams.includes(v.key)).
                         map(([key, value]) => {
-                            return key == lastHovered ?
-                                <p className="label"><b>{`> ${key} : ${value}`}</b></p> :
-                                <p className="label">{`${key} : ${value}`}</p>
+                            if (props.pickedParams.includes(key))
+                                return key == lastHovered ?
+                                    <p className="label"><b>{`> ${key} : ${value}`}</b></p> :
+                                    <p className="label">{`${key} : ${value}`}</p>
                         })}
                 </div >
             );
