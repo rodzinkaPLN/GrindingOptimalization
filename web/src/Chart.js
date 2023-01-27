@@ -9,7 +9,6 @@ const Chart = (props) => {
     const { innerWidth: width, innerHeight: height } = window;
     const [lastHovered, setLastHovered] = useState("")
 
-
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             const date = new Date(payload[0].payload.Data)
@@ -21,7 +20,7 @@ const Chart = (props) => {
                             map(([key, value]) => {
                                 if (props.pickedParams.includes(key))
                                     return key == lastHovered ?
-                                        <p className="label"><b>{`> ${key}: ${value}`}</b></p> :
+                                        <p className="label"><b>{`> ${key}: ${value} ${payload[0].payload}`}</b></p> :
                                         <p className="label">{`${key}: ${value}`}</p>
                             })
                     }
