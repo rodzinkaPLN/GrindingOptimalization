@@ -1,5 +1,5 @@
 import CircularProgress from "@mui/material/CircularProgress";
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
     Line, LineChart, Tooltip, XAxis,
     YAxis
@@ -32,7 +32,7 @@ const Chart = (props) => {
     };
 
 
-    if (props?.parameters == undefined || props?.data?.length == 0) {
+    if (props == undefined || props.data.parameters == undefined || props?.data?.length == 0) {
         return <CircularProgress />
     }
 

@@ -17,8 +17,8 @@ function daysFromNow(days) {
 function App() {
   const [data, setData] = useState([]);
   const [pickedParams, setPickedParams] = useState([])
-  const [fromDate, setFromDate] = useState(daysFromNow(-7))
-  const [toDate, setToDate] = useState(new Date())
+  const [fromDate, setFromDate] = useState(daysFromNow(-607))
+  const [toDate, setToDate] = useState(daysFromNow(-606))
 
   useEffect(() => {
     const dataFetch = async () => {
