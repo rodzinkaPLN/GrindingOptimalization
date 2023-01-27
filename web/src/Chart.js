@@ -4,6 +4,19 @@ import {
     Area, AreaChart, Brush, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis,
     YAxis
 } from 'recharts';
+const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="custom-tooltip">
+                {Object.entries(payload[0].payload).map(([key, value]) => {
+                    return <p className="label">{`${key} : ${value}`}</p>
+                })}
+            </div >
+        );
+    }
+
+    return null;
+};
 
 const Chart = () => {
     const [data, setData] = useState([]);
@@ -38,9 +51,9 @@ const Chart = () => {
                         data={data.data}
                         syncId="anyId"
                     >
-                        <XAxis dataKey="ts" />
+                        <XAxis dataKey="ts" name="Data" />
                         <YAxis />
-                        <Tooltip />
+                        <Tooltip content={<CustomTooltip />} />
 
                         <Line type="monotone" dataKey={param.key} stroke="#8884d8" activeDot={{ r: 8 }} />
                     </LineChart>
