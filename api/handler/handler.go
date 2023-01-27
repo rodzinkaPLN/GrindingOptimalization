@@ -44,7 +44,7 @@ func (h *CrudHandler) GetDataPoints(c echo.Context) error {
 		dataset.NameEQ(req.Dataset),
 	).WithDatapoints(
 		func(q *ent.DatapointQuery) {
-			q.Limit(100)
+			q.Limit(2000)
 			q.Order(ent.Asc(datapoint.FieldDataTime))
 		},
 	).WithParameters().
