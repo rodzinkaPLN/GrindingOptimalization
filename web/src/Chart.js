@@ -27,7 +27,7 @@ const Chart = (props) => {
     };
 
 
-    if (props.data.length == 0) {
+    if (props?.data?.length == 0) {
         return <CircularProgress />
     }
     return (
