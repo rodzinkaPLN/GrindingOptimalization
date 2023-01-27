@@ -8,17 +8,23 @@ import './App.css';
 import Chart from './Chart';
 import DTPicker from './DatePicker';
 
+function daysFromNow(days) {
+  const copy = new Date()
+  copy.setDate(copy.getDate() + days)
+  return copy
+}
+
 function App() {
   const [data, setData] = useState([]);
   const [pickedParams, setPickedParams] = useState([])
-  const [fromDate, setFromDate] = useState(Date.now())
-  const [toDate, setToDate] = useState(Date.now() - 2)
+  const [fromDate, setFromDate] = useState(daysFromNow(-7))
+  const [toDate, setToDate] = useState(new Date())
 
   useEffect(() => {
     const dataFetch = async () => {
       const data = await (
         await fetch(
-          `http://localhost:8080/api/v1/data?dataset=probne&from=${fromDate}&to=${toDate}`
+          `http://localhost:8080/api/v1/data?dataset=probne&from=${fromDate.toISOString()}&to=${toDate.toISOString()}`
         )
       ).json();
 

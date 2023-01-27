@@ -32,7 +32,7 @@ const Chart = (props) => {
     };
 
 
-    if (props?.data?.length == 0) {
+    if (props?.parameters == undefined || props?.data?.length == 0) {
         return <CircularProgress />
     }
 
