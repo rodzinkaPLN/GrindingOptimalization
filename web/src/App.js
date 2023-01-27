@@ -18,7 +18,7 @@ function App() {
     const dataFetch = async () => {
       const data = await (
         await fetch(
-          "http://localhost:8080/api/v1/data?dataset=probne"
+          `http://localhost:8080/api/v1/data?dataset=probne&from=${fromDate}&to=${toDate}`
         )
       ).json();
 
@@ -26,7 +26,7 @@ function App() {
     };
 
     dataFetch();
-  }, []);
+  }, [fromDate, toDate]);
   return (
     <>
       <AppBar position="static">
