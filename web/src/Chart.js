@@ -50,8 +50,9 @@ const data = [
 ];
 
 const Chart = () => {
+    const { innerWidth: width, innerHeight: height } = window;
     return (
-        <LineChart width={500} height={300} data={data}>
+        <LineChart width={width / 2} height={height / 2} data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" padding={{ left: 30, right: 30 }} />
             <YAxis />
