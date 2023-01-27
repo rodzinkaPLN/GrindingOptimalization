@@ -20,6 +20,8 @@ type Parameter struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Unit holds the value of the "unit" field.
+	Unit string `json:"unit,omitempty"`
 	// DatasetID holds the value of the "dataset_id" field.
 	DatasetID uuid.UUID `json:"dataset_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -67,7 +69,7 @@ func (*Parameter) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case parameter.FieldName:
+		case parameter.FieldName, parameter.FieldUnit:
 			values[i] = new(sql.NullString)
 		case parameter.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -99,6 +101,12 @@ func (pa *Parameter) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				pa.Name = value.String
+			}
+		case parameter.FieldUnit:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field unit", values[i])
+			} else if value.Valid {
+				pa.Unit = value.String
 			}
 		case parameter.FieldDatasetID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -152,6 +160,9 @@ func (pa *Parameter) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", pa.ID))
 	builder.WriteString("name=")
 	builder.WriteString(pa.Name)
+	builder.WriteString(", ")
+	builder.WriteString("unit=")
+	builder.WriteString(pa.Unit)
 	builder.WriteString(", ")
 	builder.WriteString("dataset_id=")
 	builder.WriteString(fmt.Sprintf("%v", pa.DatasetID))

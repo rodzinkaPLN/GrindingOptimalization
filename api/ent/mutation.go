@@ -1137,6 +1137,7 @@ type ParameterMutation struct {
 	typ               string
 	id                *uuid.UUID
 	name              *string
+	unit              *string
 	created_at        *time.Time
 	clearedFields     map[string]struct{}
 	datasets          *uuid.UUID
@@ -1287,6 +1288,42 @@ func (m *ParameterMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *ParameterMutation) ResetName() {
 	m.name = nil
+}
+
+// SetUnit sets the "unit" field.
+func (m *ParameterMutation) SetUnit(s string) {
+	m.unit = &s
+}
+
+// Unit returns the value of the "unit" field in the mutation.
+func (m *ParameterMutation) Unit() (r string, exists bool) {
+	v := m.unit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUnit returns the old "unit" field's value of the Parameter entity.
+// If the Parameter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ParameterMutation) OldUnit(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUnit is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUnit requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUnit: %w", err)
+	}
+	return oldValue.Unit, nil
+}
+
+// ResetUnit resets all changes to the "unit" field.
+func (m *ParameterMutation) ResetUnit() {
+	m.unit = nil
 }
 
 // SetDatasetID sets the "dataset_id" field.
@@ -1501,9 +1538,12 @@ func (m *ParameterMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ParameterMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.name != nil {
 		fields = append(fields, parameter.FieldName)
+	}
+	if m.unit != nil {
+		fields = append(fields, parameter.FieldUnit)
 	}
 	if m.datasets != nil {
 		fields = append(fields, parameter.FieldDatasetID)
@@ -1521,6 +1561,8 @@ func (m *ParameterMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case parameter.FieldName:
 		return m.Name()
+	case parameter.FieldUnit:
+		return m.Unit()
 	case parameter.FieldDatasetID:
 		return m.DatasetID()
 	case parameter.FieldCreatedAt:
@@ -1536,6 +1578,8 @@ func (m *ParameterMutation) OldField(ctx context.Context, name string) (ent.Valu
 	switch name {
 	case parameter.FieldName:
 		return m.OldName(ctx)
+	case parameter.FieldUnit:
+		return m.OldUnit(ctx)
 	case parameter.FieldDatasetID:
 		return m.OldDatasetID(ctx)
 	case parameter.FieldCreatedAt:
@@ -1555,6 +1599,13 @@ func (m *ParameterMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case parameter.FieldUnit:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUnit(v)
 		return nil
 	case parameter.FieldDatasetID:
 		v, ok := value.(uuid.UUID)
@@ -1630,6 +1681,9 @@ func (m *ParameterMutation) ResetField(name string) error {
 	switch name {
 	case parameter.FieldName:
 		m.ResetName()
+		return nil
+	case parameter.FieldUnit:
+		m.ResetUnit()
 		return nil
 	case parameter.FieldDatasetID:
 		m.ResetDatasetID()

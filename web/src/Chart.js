@@ -3,8 +3,9 @@ import {
     CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis,
     YAxis
 } from 'recharts';
+import { useState, useEffect } from 'react';
 
-const data = [
+const dataPs = [
     {
         name: 'Page A',
         uv: 4000,
@@ -50,9 +51,26 @@ const data = [
 ];
 
 const Chart = () => {
+    const [data, setData] = useState();
     const { innerWidth: width, innerHeight: height } = window;
+
+    useEffect(() => {
+        const dataFetch = async () => {
+            const data = await (
+                await fetch(
+                    "http://localhost:8080/api/v1/data"
+                )
+            ).json();
+
+            setData(data);
+        };
+
+        dataFetch();
+        console.log(data)
+    }, []);
+
     return (
-        <LineChart width={width / 2} height={height / 2} data={data}>
+        <LineChart width={width / 2} height={height / 2} data={dataPs}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" padding={{ left: 30, right: 30 }} />
             <YAxis />

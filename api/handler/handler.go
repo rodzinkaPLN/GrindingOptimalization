@@ -1,18 +1,13 @@
 package handler
 
 import (
-	"errors"
+	"net/http"
+	"time"
 
-	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/db"
-)
-
-var (
-	errUserTokenMissing = errors.New("failed to get user token")
-	errUserClaimMissing = errors.New("failed to get user claims")
-	errUserUIDMissing   = errors.New("failed to get user uid")
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/model"
 )
 
 type CrudHandler struct {
@@ -25,44 +20,34 @@ func NewCrudHandler(dbc *db.DB) *CrudHandler {
 	}
 }
 
-func getUID(c echo.Context) (uuid.UUID, error) {
-	token, ok := c.Get("user").(*jwt.Token)
-	if !ok {
-		return uuid.Nil, errUserTokenMissing
-	}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return uuid.Nil, errUserClaimMissing
-	}
-	uid, ok := claims["uid"].(string)
-	if !ok {
-		return uuid.Nil, errUserUIDMissing
-	}
-	return uuid.Parse(uid)
+type requestGetDatapoints struct {
+	Parameters []string  `query:"parameters"`
+	From       time.Time `query:"from"`
+	To         time.Time `query:"to"`
 }
 
-// BASE FOR EP
-// type requestCreateUserFile struct {
-// }
+type responseGetDatapoints struct {
+	Parameters []model.Parameter `json:"parameters"`
+}
 
-// type responseCreateUserFile struct {
-// }
+func (h *CrudHandler) GetDataPoints(c echo.Context) error {
+	ctx := c.Request().Context()
+	var req requestGetDatapoints
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
 
-// func (h *CrudHandler) CreateUserFile(c echo.Context) error {
-// 	ctx := c.Request().Context()
-// 	uid, err := getUID(c)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	var req requestCreateUserFile
-// 	if err := c.Bind(&req); err != nil {
-// 		return err
-// 	}
+	if err := c.Validate(req); err != nil {
+		return err
+	}
 
-// 	if err := c.Validate(req); err != nil {
-// 		return err
-// 	}
+	parameters, err := h.db.Parameter.Query().Where(
+		parameter.NameIn(req.Parameters...),
+	).WithDatapoints().
+		All(ctx)
+	if err != nil {
+		return err
+	}
 
-// 	// TODO: LOGIC
-// 	return c.JSON(http.StatusCreated, responseCreateUserFile{})
-// }
+	return c.JSON(http.StatusCreated, model.ParametersFromEntParameters(parameters))
+}

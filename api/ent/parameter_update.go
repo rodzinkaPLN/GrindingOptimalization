@@ -37,6 +37,12 @@ func (pu *ParameterUpdate) SetName(s string) *ParameterUpdate {
 	return pu
 }
 
+// SetUnit sets the "unit" field.
+func (pu *ParameterUpdate) SetUnit(s string) *ParameterUpdate {
+	pu.mutation.SetUnit(s)
+	return pu
+}
+
 // SetDatasetID sets the "dataset_id" field.
 func (pu *ParameterUpdate) SetDatasetID(u uuid.UUID) *ParameterUpdate {
 	pu.mutation.SetDatasetID(u)
@@ -185,6 +191,9 @@ func (pu *ParameterUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := pu.mutation.Name(); ok {
 		_spec.SetField(parameter.FieldName, field.TypeString, value)
 	}
+	if value, ok := pu.mutation.Unit(); ok {
+		_spec.SetField(parameter.FieldUnit, field.TypeString, value)
+	}
 	if value, ok := pu.mutation.CreatedAt(); ok {
 		_spec.SetField(parameter.FieldCreatedAt, field.TypeTime, value)
 	}
@@ -300,6 +309,12 @@ type ParameterUpdateOne struct {
 // SetName sets the "name" field.
 func (puo *ParameterUpdateOne) SetName(s string) *ParameterUpdateOne {
 	puo.mutation.SetName(s)
+	return puo
+}
+
+// SetUnit sets the "unit" field.
+func (puo *ParameterUpdateOne) SetUnit(s string) *ParameterUpdateOne {
+	puo.mutation.SetUnit(s)
 	return puo
 }
 
@@ -474,6 +489,9 @@ func (puo *ParameterUpdateOne) sqlSave(ctx context.Context) (_node *Parameter, e
 	}
 	if value, ok := puo.mutation.Name(); ok {
 		_spec.SetField(parameter.FieldName, field.TypeString, value)
+	}
+	if value, ok := puo.mutation.Unit(); ok {
+		_spec.SetField(parameter.FieldUnit, field.TypeString, value)
 	}
 	if value, ok := puo.mutation.CreatedAt(); ok {
 		_spec.SetField(parameter.FieldCreatedAt, field.TypeTime, value)

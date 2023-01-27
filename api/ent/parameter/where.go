@@ -61,6 +61,11 @@ func Name(v string) predicate.Parameter {
 	return predicate.Parameter(sql.FieldEQ(FieldName, v))
 }
 
+// Unit applies equality check predicate on the "unit" field. It's identical to UnitEQ.
+func Unit(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldEQ(FieldUnit, v))
+}
+
 // DatasetID applies equality check predicate on the "dataset_id" field. It's identical to DatasetIDEQ.
 func DatasetID(v uuid.UUID) predicate.Parameter {
 	return predicate.Parameter(sql.FieldEQ(FieldDatasetID, v))
@@ -134,6 +139,71 @@ func NameEqualFold(v string) predicate.Parameter {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Parameter {
 	return predicate.Parameter(sql.FieldContainsFold(FieldName, v))
+}
+
+// UnitEQ applies the EQ predicate on the "unit" field.
+func UnitEQ(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldEQ(FieldUnit, v))
+}
+
+// UnitNEQ applies the NEQ predicate on the "unit" field.
+func UnitNEQ(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldNEQ(FieldUnit, v))
+}
+
+// UnitIn applies the In predicate on the "unit" field.
+func UnitIn(vs ...string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldIn(FieldUnit, vs...))
+}
+
+// UnitNotIn applies the NotIn predicate on the "unit" field.
+func UnitNotIn(vs ...string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldNotIn(FieldUnit, vs...))
+}
+
+// UnitGT applies the GT predicate on the "unit" field.
+func UnitGT(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldGT(FieldUnit, v))
+}
+
+// UnitGTE applies the GTE predicate on the "unit" field.
+func UnitGTE(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldGTE(FieldUnit, v))
+}
+
+// UnitLT applies the LT predicate on the "unit" field.
+func UnitLT(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldLT(FieldUnit, v))
+}
+
+// UnitLTE applies the LTE predicate on the "unit" field.
+func UnitLTE(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldLTE(FieldUnit, v))
+}
+
+// UnitContains applies the Contains predicate on the "unit" field.
+func UnitContains(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldContains(FieldUnit, v))
+}
+
+// UnitHasPrefix applies the HasPrefix predicate on the "unit" field.
+func UnitHasPrefix(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldHasPrefix(FieldUnit, v))
+}
+
+// UnitHasSuffix applies the HasSuffix predicate on the "unit" field.
+func UnitHasSuffix(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldHasSuffix(FieldUnit, v))
+}
+
+// UnitEqualFold applies the EqualFold predicate on the "unit" field.
+func UnitEqualFold(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldEqualFold(FieldUnit, v))
+}
+
+// UnitContainsFold applies the ContainsFold predicate on the "unit" field.
+func UnitContainsFold(v string) predicate.Parameter {
+	return predicate.Parameter(sql.FieldContainsFold(FieldUnit, v))
 }
 
 // DatasetIDEQ applies the EQ predicate on the "dataset_id" field.

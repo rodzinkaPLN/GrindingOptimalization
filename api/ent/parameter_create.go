@@ -29,6 +29,12 @@ func (pc *ParameterCreate) SetName(s string) *ParameterCreate {
 	return pc
 }
 
+// SetUnit sets the "unit" field.
+func (pc *ParameterCreate) SetUnit(s string) *ParameterCreate {
+	pc.mutation.SetUnit(s)
+	return pc
+}
+
 // SetDatasetID sets the "dataset_id" field.
 func (pc *ParameterCreate) SetDatasetID(u uuid.UUID) *ParameterCreate {
 	pc.mutation.SetDatasetID(u)
@@ -155,6 +161,9 @@ func (pc *ParameterCreate) check() error {
 	if _, ok := pc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Parameter.name"`)}
 	}
+	if _, ok := pc.mutation.Unit(); !ok {
+		return &ValidationError{Name: "unit", err: errors.New(`ent: missing required field "Parameter.unit"`)}
+	}
 	if _, ok := pc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Parameter.created_at"`)}
 	}
@@ -202,6 +211,10 @@ func (pc *ParameterCreate) createSpec() (*Parameter, *sqlgraph.CreateSpec) {
 	if value, ok := pc.mutation.Name(); ok {
 		_spec.SetField(parameter.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := pc.mutation.Unit(); ok {
+		_spec.SetField(parameter.FieldUnit, field.TypeString, value)
+		_node.Unit = value
 	}
 	if value, ok := pc.mutation.CreatedAt(); ok {
 		_spec.SetField(parameter.FieldCreatedAt, field.TypeTime, value)

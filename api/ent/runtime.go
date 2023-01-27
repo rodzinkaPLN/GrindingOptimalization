@@ -39,7 +39,7 @@ func init() {
 	parameterFields := schema.Parameter{}.Fields()
 	_ = parameterFields
 	// parameterDescCreatedAt is the schema descriptor for created_at field.
-	parameterDescCreatedAt := parameterFields[3].Descriptor()
+	parameterDescCreatedAt := parameterFields[4].Descriptor()
 	// parameter.DefaultCreatedAt holds the default value on creation for the created_at field.
 	parameter.DefaultCreatedAt = parameterDescCreatedAt.Default.(func() time.Time)
 	// parameterDescID is the schema descriptor for id field.

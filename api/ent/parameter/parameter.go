@@ -15,6 +15,8 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldUnit holds the string denoting the unit field in the database.
+	FieldUnit = "unit"
 	// FieldDatasetID holds the string denoting the dataset_id field in the database.
 	FieldDatasetID = "dataset_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -45,6 +47,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldUnit,
 	FieldDatasetID,
 	FieldCreatedAt,
 }
