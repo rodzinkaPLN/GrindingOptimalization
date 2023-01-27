@@ -7,15 +7,17 @@ import * as React from 'react';
 export default function DTPicker(props) {
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateTimePicker
-                renderInput={(props) => <TextField {...props} />}
-                label={props.label}
-                value={props.date}
-                onChange={(newValue) => {
-                    props.setDate(newValue);
-                }}
-            />
-        </LocalizationProvider>
+        <div>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DateTimePicker
+                    renderInput={(props) => <TextField {...props} />}
+                    label={props.label}
+                    value={props.date}
+                    onChange={(newValue) => {
+                        props.setDate(newValue);
+                    }}
+                />
+            </LocalizationProvider>
+        </div>
     );
 }

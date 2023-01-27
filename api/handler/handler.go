@@ -50,7 +50,7 @@ func (h *CrudHandler) GetDataPoints(c echo.Context) error {
 					datapoint.DataTimeLTE(req.To),
 				),
 			)
-			q.Limit(500)
+			q.Limit(1500)
 			q.Order(ent.Asc(datapoint.FieldDataTime))
 		},
 	).WithParameters().

@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import React, { useState } from 'react';
 import {
@@ -20,7 +21,7 @@ const Chart = (props) => {
                             map(([key, value]) => {
                                 if (props.pickedParams.includes(key))
                                     return key == lastHovered ?
-                                        <p className="label"><b>{`> ${key}: ${value} ${payload[0].payload}`}</b></p> :
+                                        <p className="label"><b>{`> ${key}: ${value}`}</b></p> :
                                         <p className="label">{`${key}: ${value}`}</p>
                             })
                     }
@@ -43,21 +44,24 @@ const Chart = (props) => {
                 props.data.parameters.
                     filter(v => props.pickedParams.includes(v.key)).
                     map(param => (
-                        <LineChart
-                            width={width * 0.9}
-                            height={height / 4}
-                            data={props.data.data.filter(d => param.key in d)}
-                            syncId="anyId"
-                            onMouseEnter={() => {
-                                setLastHovered(param.key)
-                            }}
-                        >
-                            <XAxis dataKey="ts" name="Data" interval={props.data.data.length / 20} />
-                            <YAxis />
-                            <Line type="monotone" dataKey={param.key} stroke="#8884d8" />
-                            {lastHovered == param.key &&
-                                <Tooltip content={<CustomTooltip key={param.key} />} />}
-                        </LineChart>
+                        <>
+                            <Typography >{param.key}</Typography>
+                            <LineChart
+                                width={width * 0.9}
+                                height={height / 4}
+                                data={props.data.data.filter(d => param.key in d)}
+                                syncId="anyId"
+                                onMouseEnter={() => {
+                                    setLastHovered(param.key)
+                                }}
+                            >
+                                <XAxis dataKey="ts" name="Data" interval={props.data.data.length / 20} />
+                                <YAxis />
+                                <Line type="monotone" dataKey={param.key} stroke="#8884d8" />
+                                {lastHovered == param.key &&
+                                    <Tooltip content={<CustomTooltip key={param.key} />} />}
+                            </LineChart>
+                        </>
                     ))
             }
         </div>)

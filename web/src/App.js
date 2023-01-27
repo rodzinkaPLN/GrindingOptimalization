@@ -36,7 +36,7 @@ function App() {
   return (
     <>
       <AppBar position="static">
-        <Toolbar>
+        <Toolbar sx={{ padding: "1em" }} className="AppToolbar">
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Admin panel
           </Typography>
@@ -54,6 +54,7 @@ function App() {
           data={data}
           pickedParams={pickedParams}
         />
+
       </div>
     </>
   );

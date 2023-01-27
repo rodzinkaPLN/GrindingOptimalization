@@ -19,6 +19,12 @@
   justify-content: center;
   /* font-size: calc(10px + 2vmin); */
   color: white;
+  padding-top: 2em;
+  padding-bottom: 3em;
+}
+
+.AppToolbar>* {
+  padding: 0.2em;
 }
 
 .App-link {
