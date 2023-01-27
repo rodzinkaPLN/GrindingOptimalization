@@ -40,7 +40,12 @@ func (h *CrudHandler) DataCSVUpload(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() {
+		err := tx.Rollback()
+		if err != nil {
+			log.Println("rollback issue", err)
+		}
+	}()
 	columns := header[2:]
 	dataset, err := h.db.
 		Dataset.
