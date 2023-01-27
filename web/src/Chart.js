@@ -12,15 +12,19 @@ const Chart = (props) => {
 
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
+            const date = new Date(payload[0].payload.Data)
             return (
-                <div className="custom-tooltip">
-                    {Object.entries(payload[0].payload).
-                        map(([key, value]) => {
-                            if (props.pickedParams.includes(key))
-                                return key == lastHovered ?
-                                    <p className="label"><b>{`> ${key} : ${value}`}</b></p> :
-                                    <p className="label">{`${key} : ${value}`}</p>
-                        })}
+                < div className="custom-tooltip" >
+                    <p className="label"><b>{` Data: ${date.toLocaleDateString("pl")} ${date.toLocaleTimeString("pl")}`}</b></p>
+                    {
+                        Object.entries(payload[0].payload).
+                            map(([key, value]) => {
+                                if (props.pickedParams.includes(key))
+                                    return key == lastHovered ?
+                                        <p className="label"><b>{`> ${key}: ${value}`}</b></p> :
+                                        <p className="label">{`${key}: ${value}`}</p>
+                            })
+                    }
                 </div >
             );
         }
@@ -41,7 +45,7 @@ const Chart = (props) => {
                     filter(v => props.pickedParams.includes(v.key)).
                     map(param => (
                         <LineChart
-                            width={width / 2}
+                            width={width * 0.9}
                             height={height / 4}
                             data={props.data.data.filter(d => param.key in d)}
                             syncId="anyId"
