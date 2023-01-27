@@ -12,9 +12,9 @@ var (
 	DatapointsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "data_time", Type: field.TypeTime},
-		{Name: "val", Type: field.TypeFloat64},
+		{Name: "vals", Type: field.TypeJSON},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "parameter_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "dataset_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// DatapointsTable holds the schema information for the "datapoints" table.
 	DatapointsTable = &schema.Table{
@@ -23,9 +23,9 @@ var (
 		PrimaryKey: []*schema.Column{DatapointsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "datapoints_parameters_datapoints",
+				Symbol:     "datapoints_datasets_datapoints",
 				Columns:    []*schema.Column{DatapointsColumns[4]},
-				RefColumns: []*schema.Column{ParametersColumns[0]},
+				RefColumns: []*schema.Column{DatasetsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -73,6 +73,6 @@ var (
 )
 
 func init() {
-	DatapointsTable.ForeignKeys[0].RefTable = ParametersTable
+	DatapointsTable.ForeignKeys[0].RefTable = DatasetsTable
 	ParametersTable.ForeignKeys[0].RefTable = DatasetsTable
 }

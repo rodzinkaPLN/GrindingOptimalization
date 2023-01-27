@@ -35,11 +35,9 @@ type Parameter struct {
 type ParameterEdges struct {
 	// Datasets holds the value of the datasets edge.
 	Datasets *Dataset `json:"datasets,omitempty"`
-	// Datapoints holds the value of the datapoints edge.
-	Datapoints []*Datapoint `json:"datapoints,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 }
 
 // DatasetsOrErr returns the Datasets value or an error if the edge
@@ -53,15 +51,6 @@ func (e ParameterEdges) DatasetsOrErr() (*Dataset, error) {
 		return e.Datasets, nil
 	}
 	return nil, &NotLoadedError{edge: "datasets"}
-}
-
-// DatapointsOrErr returns the Datapoints value or an error if the edge
-// was not loaded in eager-loading.
-func (e ParameterEdges) DatapointsOrErr() ([]*Datapoint, error) {
-	if e.loadedTypes[1] {
-		return e.Datapoints, nil
-	}
-	return nil, &NotLoadedError{edge: "datapoints"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -128,11 +117,6 @@ func (pa *Parameter) assignValues(columns []string, values []any) error {
 // QueryDatasets queries the "datasets" edge of the Parameter entity.
 func (pa *Parameter) QueryDatasets() *DatasetQuery {
 	return NewParameterClient(pa.config).QueryDatasets(pa)
-}
-
-// QueryDatapoints queries the "datapoints" edge of the Parameter entity.
-func (pa *Parameter) QueryDatapoints() *DatapointQuery {
-	return NewParameterClient(pa.config).QueryDatapoints(pa)
 }
 
 // Update returns a builder for updating this Parameter.

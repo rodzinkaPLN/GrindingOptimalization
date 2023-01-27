@@ -61,14 +61,9 @@ func DataTime(v time.Time) predicate.Datapoint {
 	return predicate.Datapoint(sql.FieldEQ(FieldDataTime, v))
 }
 
-// ParameterID applies equality check predicate on the "parameter_id" field. It's identical to ParameterIDEQ.
-func ParameterID(v uuid.UUID) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldEQ(FieldParameterID, v))
-}
-
-// Val applies equality check predicate on the "val" field. It's identical to ValEQ.
-func Val(v float64) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldEQ(FieldVal, v))
+// DatasetID applies equality check predicate on the "dataset_id" field. It's identical to DatasetIDEQ.
+func DatasetID(v uuid.UUID) predicate.Datapoint {
+	return predicate.Datapoint(sql.FieldEQ(FieldDatasetID, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -116,74 +111,34 @@ func DataTimeLTE(v time.Time) predicate.Datapoint {
 	return predicate.Datapoint(sql.FieldLTE(FieldDataTime, v))
 }
 
-// ParameterIDEQ applies the EQ predicate on the "parameter_id" field.
-func ParameterIDEQ(v uuid.UUID) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldEQ(FieldParameterID, v))
+// DatasetIDEQ applies the EQ predicate on the "dataset_id" field.
+func DatasetIDEQ(v uuid.UUID) predicate.Datapoint {
+	return predicate.Datapoint(sql.FieldEQ(FieldDatasetID, v))
 }
 
-// ParameterIDNEQ applies the NEQ predicate on the "parameter_id" field.
-func ParameterIDNEQ(v uuid.UUID) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldNEQ(FieldParameterID, v))
+// DatasetIDNEQ applies the NEQ predicate on the "dataset_id" field.
+func DatasetIDNEQ(v uuid.UUID) predicate.Datapoint {
+	return predicate.Datapoint(sql.FieldNEQ(FieldDatasetID, v))
 }
 
-// ParameterIDIn applies the In predicate on the "parameter_id" field.
-func ParameterIDIn(vs ...uuid.UUID) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldIn(FieldParameterID, vs...))
+// DatasetIDIn applies the In predicate on the "dataset_id" field.
+func DatasetIDIn(vs ...uuid.UUID) predicate.Datapoint {
+	return predicate.Datapoint(sql.FieldIn(FieldDatasetID, vs...))
 }
 
-// ParameterIDNotIn applies the NotIn predicate on the "parameter_id" field.
-func ParameterIDNotIn(vs ...uuid.UUID) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldNotIn(FieldParameterID, vs...))
+// DatasetIDNotIn applies the NotIn predicate on the "dataset_id" field.
+func DatasetIDNotIn(vs ...uuid.UUID) predicate.Datapoint {
+	return predicate.Datapoint(sql.FieldNotIn(FieldDatasetID, vs...))
 }
 
-// ParameterIDIsNil applies the IsNil predicate on the "parameter_id" field.
-func ParameterIDIsNil() predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldIsNull(FieldParameterID))
+// DatasetIDIsNil applies the IsNil predicate on the "dataset_id" field.
+func DatasetIDIsNil() predicate.Datapoint {
+	return predicate.Datapoint(sql.FieldIsNull(FieldDatasetID))
 }
 
-// ParameterIDNotNil applies the NotNil predicate on the "parameter_id" field.
-func ParameterIDNotNil() predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldNotNull(FieldParameterID))
-}
-
-// ValEQ applies the EQ predicate on the "val" field.
-func ValEQ(v float64) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldEQ(FieldVal, v))
-}
-
-// ValNEQ applies the NEQ predicate on the "val" field.
-func ValNEQ(v float64) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldNEQ(FieldVal, v))
-}
-
-// ValIn applies the In predicate on the "val" field.
-func ValIn(vs ...float64) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldIn(FieldVal, vs...))
-}
-
-// ValNotIn applies the NotIn predicate on the "val" field.
-func ValNotIn(vs ...float64) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldNotIn(FieldVal, vs...))
-}
-
-// ValGT applies the GT predicate on the "val" field.
-func ValGT(v float64) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldGT(FieldVal, v))
-}
-
-// ValGTE applies the GTE predicate on the "val" field.
-func ValGTE(v float64) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldGTE(FieldVal, v))
-}
-
-// ValLT applies the LT predicate on the "val" field.
-func ValLT(v float64) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldLT(FieldVal, v))
-}
-
-// ValLTE applies the LTE predicate on the "val" field.
-func ValLTE(v float64) predicate.Datapoint {
-	return predicate.Datapoint(sql.FieldLTE(FieldVal, v))
+// DatasetIDNotNil applies the NotNil predicate on the "dataset_id" field.
+func DatasetIDNotNil() predicate.Datapoint {
+	return predicate.Datapoint(sql.FieldNotNull(FieldDatasetID))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -226,24 +181,24 @@ func CreatedAtLTE(v time.Time) predicate.Datapoint {
 	return predicate.Datapoint(sql.FieldLTE(FieldCreatedAt, v))
 }
 
-// HasParameters applies the HasEdge predicate on the "parameters" edge.
-func HasParameters() predicate.Datapoint {
+// HasDatasets applies the HasEdge predicate on the "datasets" edge.
+func HasDatasets() predicate.Datapoint {
 	return predicate.Datapoint(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ParametersTable, ParametersColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, DatasetsTable, DatasetsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasParametersWith applies the HasEdge predicate on the "parameters" edge with a given conditions (other predicates).
-func HasParametersWith(preds ...predicate.Parameter) predicate.Datapoint {
+// HasDatasetsWith applies the HasEdge predicate on the "datasets" edge with a given conditions (other predicates).
+func HasDatasetsWith(preds ...predicate.Dataset) predicate.Datapoint {
 	return predicate.Datapoint(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ParametersInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ParametersTable, ParametersColumn),
+			sqlgraph.To(DatasetsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, DatasetsTable, DatasetsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

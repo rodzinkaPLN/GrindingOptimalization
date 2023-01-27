@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 )
@@ -94,21 +93,6 @@ func (pc *ParameterCreate) SetNillableDatasetsID(id *uuid.UUID) *ParameterCreate
 // SetDatasets sets the "datasets" edge to the Dataset entity.
 func (pc *ParameterCreate) SetDatasets(d *Dataset) *ParameterCreate {
 	return pc.SetDatasetsID(d.ID)
-}
-
-// AddDatapointIDs adds the "datapoints" edge to the Datapoint entity by IDs.
-func (pc *ParameterCreate) AddDatapointIDs(ids ...uuid.UUID) *ParameterCreate {
-	pc.mutation.AddDatapointIDs(ids...)
-	return pc
-}
-
-// AddDatapoints adds the "datapoints" edges to the Datapoint entity.
-func (pc *ParameterCreate) AddDatapoints(d ...*Datapoint) *ParameterCreate {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
-	}
-	return pc.AddDatapointIDs(ids...)
 }
 
 // Mutation returns the ParameterMutation object of the builder.
@@ -238,25 +222,6 @@ func (pc *ParameterCreate) createSpec() (*Parameter, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.DatasetID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := pc.mutation.DatapointsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   parameter.DatapointsTable,
-			Columns: []string{parameter.DatapointsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: datapoint.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

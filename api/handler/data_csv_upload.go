@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent"
 	entDataset "github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/schema"
 )
 
 const batchingNo = 4096
@@ -83,15 +83,6 @@ func (h *CrudHandler) DataCSVUpload(c echo.Context) error {
 		return err
 	}
 
-	paramIds := make(map[string]uuid.UUID)
-	for _, p := range dataset.Edges.Parameters {
-		paramIds[p.Name] = p.ID
-	}
-
-	ids := make([]uuid.UUID, len(columns))
-	for i, v := range columns {
-		ids[i] = paramIds[v]
-	}
 	go func() {
 		ctx = context.Background()
 		err := func() error {
@@ -102,6 +93,7 @@ func (h *CrudHandler) DataCSVUpload(c echo.Context) error {
 					return err
 				}
 
+				d := make(schema.DataT)
 				for i, v := range row[2:] {
 					if v == "" {
 						// skip empty values
@@ -111,14 +103,15 @@ func (h *CrudHandler) DataCSVUpload(c echo.Context) error {
 					if err != nil {
 						return err
 					}
-					toInsert = append(toInsert, h.db.
-						Datapoint.
-						Create().
-						SetParametersID(ids[i]).
-						SetVal(fVal).
-						SetDataTime(date),
-					)
+					d[columns[i]] = fVal
 				}
+				toInsert = append(toInsert, h.db.
+					Datapoint.
+					Create().
+					SetDatasetID(dataset.ID).
+					SetVals(d).
+					SetDataTime(date),
+				)
 				if len(toInsert) >= batchingNo {
 					log.Println("insert batch")
 					err = h.db.Datapoint.

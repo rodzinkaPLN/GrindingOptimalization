@@ -12,18 +12,18 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/predicate"
 )
 
 // DatapointQuery is the builder for querying Datapoint entities.
 type DatapointQuery struct {
 	config
-	ctx            *QueryContext
-	order          []OrderFunc
-	inters         []Interceptor
-	predicates     []predicate.Datapoint
-	withParameters *ParameterQuery
+	ctx          *QueryContext
+	order        []OrderFunc
+	inters       []Interceptor
+	predicates   []predicate.Datapoint
+	withDatasets *DatasetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,9 +60,9 @@ func (dq *DatapointQuery) Order(o ...OrderFunc) *DatapointQuery {
 	return dq
 }
 
-// QueryParameters chains the current query on the "parameters" edge.
-func (dq *DatapointQuery) QueryParameters() *ParameterQuery {
-	query := (&ParameterClient{config: dq.config}).Query()
+// QueryDatasets chains the current query on the "datasets" edge.
+func (dq *DatapointQuery) QueryDatasets() *DatasetQuery {
+	query := (&DatasetClient{config: dq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := dq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -73,8 +73,8 @@ func (dq *DatapointQuery) QueryParameters() *ParameterQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(datapoint.Table, datapoint.FieldID, selector),
-			sqlgraph.To(parameter.Table, parameter.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, datapoint.ParametersTable, datapoint.ParametersColumn),
+			sqlgraph.To(dataset.Table, dataset.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, datapoint.DatasetsTable, datapoint.DatasetsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
 		return fromU, nil
@@ -267,26 +267,26 @@ func (dq *DatapointQuery) Clone() *DatapointQuery {
 		return nil
 	}
 	return &DatapointQuery{
-		config:         dq.config,
-		ctx:            dq.ctx.Clone(),
-		order:          append([]OrderFunc{}, dq.order...),
-		inters:         append([]Interceptor{}, dq.inters...),
-		predicates:     append([]predicate.Datapoint{}, dq.predicates...),
-		withParameters: dq.withParameters.Clone(),
+		config:       dq.config,
+		ctx:          dq.ctx.Clone(),
+		order:        append([]OrderFunc{}, dq.order...),
+		inters:       append([]Interceptor{}, dq.inters...),
+		predicates:   append([]predicate.Datapoint{}, dq.predicates...),
+		withDatasets: dq.withDatasets.Clone(),
 		// clone intermediate query.
 		sql:  dq.sql.Clone(),
 		path: dq.path,
 	}
 }
 
-// WithParameters tells the query-builder to eager-load the nodes that are connected to
-// the "parameters" edge. The optional arguments are used to configure the query builder of the edge.
-func (dq *DatapointQuery) WithParameters(opts ...func(*ParameterQuery)) *DatapointQuery {
-	query := (&ParameterClient{config: dq.config}).Query()
+// WithDatasets tells the query-builder to eager-load the nodes that are connected to
+// the "datasets" edge. The optional arguments are used to configure the query builder of the edge.
+func (dq *DatapointQuery) WithDatasets(opts ...func(*DatasetQuery)) *DatapointQuery {
+	query := (&DatasetClient{config: dq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	dq.withParameters = query
+	dq.withDatasets = query
 	return dq
 }
 
@@ -369,7 +369,7 @@ func (dq *DatapointQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Da
 		nodes       = []*Datapoint{}
 		_spec       = dq.querySpec()
 		loadedTypes = [1]bool{
-			dq.withParameters != nil,
+			dq.withDatasets != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -390,20 +390,20 @@ func (dq *DatapointQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Da
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := dq.withParameters; query != nil {
-		if err := dq.loadParameters(ctx, query, nodes, nil,
-			func(n *Datapoint, e *Parameter) { n.Edges.Parameters = e }); err != nil {
+	if query := dq.withDatasets; query != nil {
+		if err := dq.loadDatasets(ctx, query, nodes, nil,
+			func(n *Datapoint, e *Dataset) { n.Edges.Datasets = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (dq *DatapointQuery) loadParameters(ctx context.Context, query *ParameterQuery, nodes []*Datapoint, init func(*Datapoint), assign func(*Datapoint, *Parameter)) error {
+func (dq *DatapointQuery) loadDatasets(ctx context.Context, query *DatasetQuery, nodes []*Datapoint, init func(*Datapoint), assign func(*Datapoint, *Dataset)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*Datapoint)
 	for i := range nodes {
-		fk := nodes[i].ParameterID
+		fk := nodes[i].DatasetID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -412,7 +412,7 @@ func (dq *DatapointQuery) loadParameters(ctx context.Context, query *ParameterQu
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(parameter.IDIn(ids...))
+	query.Where(dataset.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -420,7 +420,7 @@ func (dq *DatapointQuery) loadParameters(ctx context.Context, query *ParameterQu
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "parameter_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "dataset_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

@@ -13,8 +13,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/predicate"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/schema"
 )
 
 // DatapointUpdate is the builder for updating Datapoint entities.
@@ -36,36 +37,29 @@ func (du *DatapointUpdate) SetDataTime(t time.Time) *DatapointUpdate {
 	return du
 }
 
-// SetParameterID sets the "parameter_id" field.
-func (du *DatapointUpdate) SetParameterID(u uuid.UUID) *DatapointUpdate {
-	du.mutation.SetParameterID(u)
+// SetDatasetID sets the "dataset_id" field.
+func (du *DatapointUpdate) SetDatasetID(u uuid.UUID) *DatapointUpdate {
+	du.mutation.SetDatasetID(u)
 	return du
 }
 
-// SetNillableParameterID sets the "parameter_id" field if the given value is not nil.
-func (du *DatapointUpdate) SetNillableParameterID(u *uuid.UUID) *DatapointUpdate {
+// SetNillableDatasetID sets the "dataset_id" field if the given value is not nil.
+func (du *DatapointUpdate) SetNillableDatasetID(u *uuid.UUID) *DatapointUpdate {
 	if u != nil {
-		du.SetParameterID(*u)
+		du.SetDatasetID(*u)
 	}
 	return du
 }
 
-// ClearParameterID clears the value of the "parameter_id" field.
-func (du *DatapointUpdate) ClearParameterID() *DatapointUpdate {
-	du.mutation.ClearParameterID()
+// ClearDatasetID clears the value of the "dataset_id" field.
+func (du *DatapointUpdate) ClearDatasetID() *DatapointUpdate {
+	du.mutation.ClearDatasetID()
 	return du
 }
 
-// SetVal sets the "val" field.
-func (du *DatapointUpdate) SetVal(f float64) *DatapointUpdate {
-	du.mutation.ResetVal()
-	du.mutation.SetVal(f)
-	return du
-}
-
-// AddVal adds f to the "val" field.
-func (du *DatapointUpdate) AddVal(f float64) *DatapointUpdate {
-	du.mutation.AddVal(f)
+// SetVals sets the "vals" field.
+func (du *DatapointUpdate) SetVals(s schema.DataT) *DatapointUpdate {
+	du.mutation.SetVals(s)
 	return du
 }
 
@@ -83,23 +77,23 @@ func (du *DatapointUpdate) SetNillableCreatedAt(t *time.Time) *DatapointUpdate {
 	return du
 }
 
-// SetParametersID sets the "parameters" edge to the Parameter entity by ID.
-func (du *DatapointUpdate) SetParametersID(id uuid.UUID) *DatapointUpdate {
-	du.mutation.SetParametersID(id)
+// SetDatasetsID sets the "datasets" edge to the Dataset entity by ID.
+func (du *DatapointUpdate) SetDatasetsID(id uuid.UUID) *DatapointUpdate {
+	du.mutation.SetDatasetsID(id)
 	return du
 }
 
-// SetNillableParametersID sets the "parameters" edge to the Parameter entity by ID if the given value is not nil.
-func (du *DatapointUpdate) SetNillableParametersID(id *uuid.UUID) *DatapointUpdate {
+// SetNillableDatasetsID sets the "datasets" edge to the Dataset entity by ID if the given value is not nil.
+func (du *DatapointUpdate) SetNillableDatasetsID(id *uuid.UUID) *DatapointUpdate {
 	if id != nil {
-		du = du.SetParametersID(*id)
+		du = du.SetDatasetsID(*id)
 	}
 	return du
 }
 
-// SetParameters sets the "parameters" edge to the Parameter entity.
-func (du *DatapointUpdate) SetParameters(p *Parameter) *DatapointUpdate {
-	return du.SetParametersID(p.ID)
+// SetDatasets sets the "datasets" edge to the Dataset entity.
+func (du *DatapointUpdate) SetDatasets(d *Dataset) *DatapointUpdate {
+	return du.SetDatasetsID(d.ID)
 }
 
 // Mutation returns the DatapointMutation object of the builder.
@@ -107,9 +101,9 @@ func (du *DatapointUpdate) Mutation() *DatapointMutation {
 	return du.mutation
 }
 
-// ClearParameters clears the "parameters" edge to the Parameter entity.
-func (du *DatapointUpdate) ClearParameters() *DatapointUpdate {
-	du.mutation.ClearParameters()
+// ClearDatasets clears the "datasets" edge to the Dataset entity.
+func (du *DatapointUpdate) ClearDatasets() *DatapointUpdate {
+	du.mutation.ClearDatasets()
 	return du
 }
 
@@ -161,42 +155,39 @@ func (du *DatapointUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := du.mutation.DataTime(); ok {
 		_spec.SetField(datapoint.FieldDataTime, field.TypeTime, value)
 	}
-	if value, ok := du.mutation.Val(); ok {
-		_spec.SetField(datapoint.FieldVal, field.TypeFloat64, value)
-	}
-	if value, ok := du.mutation.AddedVal(); ok {
-		_spec.AddField(datapoint.FieldVal, field.TypeFloat64, value)
+	if value, ok := du.mutation.Vals(); ok {
+		_spec.SetField(datapoint.FieldVals, field.TypeJSON, value)
 	}
 	if value, ok := du.mutation.CreatedAt(); ok {
 		_spec.SetField(datapoint.FieldCreatedAt, field.TypeTime, value)
 	}
-	if du.mutation.ParametersCleared() {
+	if du.mutation.DatasetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   datapoint.ParametersTable,
-			Columns: []string{datapoint.ParametersColumn},
+			Table:   datapoint.DatasetsTable,
+			Columns: []string{datapoint.DatasetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: parameter.FieldID,
+					Column: dataset.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := du.mutation.ParametersIDs(); len(nodes) > 0 {
+	if nodes := du.mutation.DatasetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   datapoint.ParametersTable,
-			Columns: []string{datapoint.ParametersColumn},
+			Table:   datapoint.DatasetsTable,
+			Columns: []string{datapoint.DatasetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: parameter.FieldID,
+					Column: dataset.FieldID,
 				},
 			},
 		}
@@ -231,36 +222,29 @@ func (duo *DatapointUpdateOne) SetDataTime(t time.Time) *DatapointUpdateOne {
 	return duo
 }
 
-// SetParameterID sets the "parameter_id" field.
-func (duo *DatapointUpdateOne) SetParameterID(u uuid.UUID) *DatapointUpdateOne {
-	duo.mutation.SetParameterID(u)
+// SetDatasetID sets the "dataset_id" field.
+func (duo *DatapointUpdateOne) SetDatasetID(u uuid.UUID) *DatapointUpdateOne {
+	duo.mutation.SetDatasetID(u)
 	return duo
 }
 
-// SetNillableParameterID sets the "parameter_id" field if the given value is not nil.
-func (duo *DatapointUpdateOne) SetNillableParameterID(u *uuid.UUID) *DatapointUpdateOne {
+// SetNillableDatasetID sets the "dataset_id" field if the given value is not nil.
+func (duo *DatapointUpdateOne) SetNillableDatasetID(u *uuid.UUID) *DatapointUpdateOne {
 	if u != nil {
-		duo.SetParameterID(*u)
+		duo.SetDatasetID(*u)
 	}
 	return duo
 }
 
-// ClearParameterID clears the value of the "parameter_id" field.
-func (duo *DatapointUpdateOne) ClearParameterID() *DatapointUpdateOne {
-	duo.mutation.ClearParameterID()
+// ClearDatasetID clears the value of the "dataset_id" field.
+func (duo *DatapointUpdateOne) ClearDatasetID() *DatapointUpdateOne {
+	duo.mutation.ClearDatasetID()
 	return duo
 }
 
-// SetVal sets the "val" field.
-func (duo *DatapointUpdateOne) SetVal(f float64) *DatapointUpdateOne {
-	duo.mutation.ResetVal()
-	duo.mutation.SetVal(f)
-	return duo
-}
-
-// AddVal adds f to the "val" field.
-func (duo *DatapointUpdateOne) AddVal(f float64) *DatapointUpdateOne {
-	duo.mutation.AddVal(f)
+// SetVals sets the "vals" field.
+func (duo *DatapointUpdateOne) SetVals(s schema.DataT) *DatapointUpdateOne {
+	duo.mutation.SetVals(s)
 	return duo
 }
 
@@ -278,23 +262,23 @@ func (duo *DatapointUpdateOne) SetNillableCreatedAt(t *time.Time) *DatapointUpda
 	return duo
 }
 
-// SetParametersID sets the "parameters" edge to the Parameter entity by ID.
-func (duo *DatapointUpdateOne) SetParametersID(id uuid.UUID) *DatapointUpdateOne {
-	duo.mutation.SetParametersID(id)
+// SetDatasetsID sets the "datasets" edge to the Dataset entity by ID.
+func (duo *DatapointUpdateOne) SetDatasetsID(id uuid.UUID) *DatapointUpdateOne {
+	duo.mutation.SetDatasetsID(id)
 	return duo
 }
 
-// SetNillableParametersID sets the "parameters" edge to the Parameter entity by ID if the given value is not nil.
-func (duo *DatapointUpdateOne) SetNillableParametersID(id *uuid.UUID) *DatapointUpdateOne {
+// SetNillableDatasetsID sets the "datasets" edge to the Dataset entity by ID if the given value is not nil.
+func (duo *DatapointUpdateOne) SetNillableDatasetsID(id *uuid.UUID) *DatapointUpdateOne {
 	if id != nil {
-		duo = duo.SetParametersID(*id)
+		duo = duo.SetDatasetsID(*id)
 	}
 	return duo
 }
 
-// SetParameters sets the "parameters" edge to the Parameter entity.
-func (duo *DatapointUpdateOne) SetParameters(p *Parameter) *DatapointUpdateOne {
-	return duo.SetParametersID(p.ID)
+// SetDatasets sets the "datasets" edge to the Dataset entity.
+func (duo *DatapointUpdateOne) SetDatasets(d *Dataset) *DatapointUpdateOne {
+	return duo.SetDatasetsID(d.ID)
 }
 
 // Mutation returns the DatapointMutation object of the builder.
@@ -302,9 +286,9 @@ func (duo *DatapointUpdateOne) Mutation() *DatapointMutation {
 	return duo.mutation
 }
 
-// ClearParameters clears the "parameters" edge to the Parameter entity.
-func (duo *DatapointUpdateOne) ClearParameters() *DatapointUpdateOne {
-	duo.mutation.ClearParameters()
+// ClearDatasets clears the "datasets" edge to the Dataset entity.
+func (duo *DatapointUpdateOne) ClearDatasets() *DatapointUpdateOne {
+	duo.mutation.ClearDatasets()
 	return duo
 }
 
@@ -380,42 +364,39 @@ func (duo *DatapointUpdateOne) sqlSave(ctx context.Context) (_node *Datapoint, e
 	if value, ok := duo.mutation.DataTime(); ok {
 		_spec.SetField(datapoint.FieldDataTime, field.TypeTime, value)
 	}
-	if value, ok := duo.mutation.Val(); ok {
-		_spec.SetField(datapoint.FieldVal, field.TypeFloat64, value)
-	}
-	if value, ok := duo.mutation.AddedVal(); ok {
-		_spec.AddField(datapoint.FieldVal, field.TypeFloat64, value)
+	if value, ok := duo.mutation.Vals(); ok {
+		_spec.SetField(datapoint.FieldVals, field.TypeJSON, value)
 	}
 	if value, ok := duo.mutation.CreatedAt(); ok {
 		_spec.SetField(datapoint.FieldCreatedAt, field.TypeTime, value)
 	}
-	if duo.mutation.ParametersCleared() {
+	if duo.mutation.DatasetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   datapoint.ParametersTable,
-			Columns: []string{datapoint.ParametersColumn},
+			Table:   datapoint.DatasetsTable,
+			Columns: []string{datapoint.DatasetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: parameter.FieldID,
+					Column: dataset.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := duo.mutation.ParametersIDs(); len(nodes) > 0 {
+	if nodes := duo.mutation.DatasetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   datapoint.ParametersTable,
-			Columns: []string{datapoint.ParametersColumn},
+			Table:   datapoint.DatasetsTable,
+			Columns: []string{datapoint.DatasetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: parameter.FieldID,
+					Column: dataset.FieldID,
 				},
 			},
 		}

@@ -14,6 +14,7 @@ import (
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/predicate"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/schema"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -36,19 +37,18 @@ const (
 // DatapointMutation represents an operation that mutates the Datapoint nodes in the graph.
 type DatapointMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *uuid.UUID
-	data_time         *time.Time
-	val               *float64
-	addval            *float64
-	created_at        *time.Time
-	clearedFields     map[string]struct{}
-	parameters        *uuid.UUID
-	clearedparameters bool
-	done              bool
-	oldValue          func(context.Context) (*Datapoint, error)
-	predicates        []predicate.Datapoint
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	data_time       *time.Time
+	vals            *schema.DataT
+	created_at      *time.Time
+	clearedFields   map[string]struct{}
+	datasets        *uuid.UUID
+	cleareddatasets bool
+	done            bool
+	oldValue        func(context.Context) (*Datapoint, error)
+	predicates      []predicate.Datapoint
 }
 
 var _ ent.Mutation = (*DatapointMutation)(nil)
@@ -191,109 +191,89 @@ func (m *DatapointMutation) ResetDataTime() {
 	m.data_time = nil
 }
 
-// SetParameterID sets the "parameter_id" field.
-func (m *DatapointMutation) SetParameterID(u uuid.UUID) {
-	m.parameters = &u
+// SetDatasetID sets the "dataset_id" field.
+func (m *DatapointMutation) SetDatasetID(u uuid.UUID) {
+	m.datasets = &u
 }
 
-// ParameterID returns the value of the "parameter_id" field in the mutation.
-func (m *DatapointMutation) ParameterID() (r uuid.UUID, exists bool) {
-	v := m.parameters
+// DatasetID returns the value of the "dataset_id" field in the mutation.
+func (m *DatapointMutation) DatasetID() (r uuid.UUID, exists bool) {
+	v := m.datasets
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldParameterID returns the old "parameter_id" field's value of the Datapoint entity.
+// OldDatasetID returns the old "dataset_id" field's value of the Datapoint entity.
 // If the Datapoint object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DatapointMutation) OldParameterID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *DatapointMutation) OldDatasetID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldParameterID is only allowed on UpdateOne operations")
+		return v, errors.New("OldDatasetID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldParameterID requires an ID field in the mutation")
+		return v, errors.New("OldDatasetID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldParameterID: %w", err)
+		return v, fmt.Errorf("querying old value for OldDatasetID: %w", err)
 	}
-	return oldValue.ParameterID, nil
+	return oldValue.DatasetID, nil
 }
 
-// ClearParameterID clears the value of the "parameter_id" field.
-func (m *DatapointMutation) ClearParameterID() {
-	m.parameters = nil
-	m.clearedFields[datapoint.FieldParameterID] = struct{}{}
+// ClearDatasetID clears the value of the "dataset_id" field.
+func (m *DatapointMutation) ClearDatasetID() {
+	m.datasets = nil
+	m.clearedFields[datapoint.FieldDatasetID] = struct{}{}
 }
 
-// ParameterIDCleared returns if the "parameter_id" field was cleared in this mutation.
-func (m *DatapointMutation) ParameterIDCleared() bool {
-	_, ok := m.clearedFields[datapoint.FieldParameterID]
+// DatasetIDCleared returns if the "dataset_id" field was cleared in this mutation.
+func (m *DatapointMutation) DatasetIDCleared() bool {
+	_, ok := m.clearedFields[datapoint.FieldDatasetID]
 	return ok
 }
 
-// ResetParameterID resets all changes to the "parameter_id" field.
-func (m *DatapointMutation) ResetParameterID() {
-	m.parameters = nil
-	delete(m.clearedFields, datapoint.FieldParameterID)
+// ResetDatasetID resets all changes to the "dataset_id" field.
+func (m *DatapointMutation) ResetDatasetID() {
+	m.datasets = nil
+	delete(m.clearedFields, datapoint.FieldDatasetID)
 }
 
-// SetVal sets the "val" field.
-func (m *DatapointMutation) SetVal(f float64) {
-	m.val = &f
-	m.addval = nil
+// SetVals sets the "vals" field.
+func (m *DatapointMutation) SetVals(s schema.DataT) {
+	m.vals = &s
 }
 
-// Val returns the value of the "val" field in the mutation.
-func (m *DatapointMutation) Val() (r float64, exists bool) {
-	v := m.val
+// Vals returns the value of the "vals" field in the mutation.
+func (m *DatapointMutation) Vals() (r schema.DataT, exists bool) {
+	v := m.vals
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldVal returns the old "val" field's value of the Datapoint entity.
+// OldVals returns the old "vals" field's value of the Datapoint entity.
 // If the Datapoint object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DatapointMutation) OldVal(ctx context.Context) (v float64, err error) {
+func (m *DatapointMutation) OldVals(ctx context.Context) (v schema.DataT, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldVal is only allowed on UpdateOne operations")
+		return v, errors.New("OldVals is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldVal requires an ID field in the mutation")
+		return v, errors.New("OldVals requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldVal: %w", err)
+		return v, fmt.Errorf("querying old value for OldVals: %w", err)
 	}
-	return oldValue.Val, nil
+	return oldValue.Vals, nil
 }
 
-// AddVal adds f to the "val" field.
-func (m *DatapointMutation) AddVal(f float64) {
-	if m.addval != nil {
-		*m.addval += f
-	} else {
-		m.addval = &f
-	}
-}
-
-// AddedVal returns the value that was added to the "val" field in this mutation.
-func (m *DatapointMutation) AddedVal() (r float64, exists bool) {
-	v := m.addval
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetVal resets all changes to the "val" field.
-func (m *DatapointMutation) ResetVal() {
-	m.val = nil
-	m.addval = nil
+// ResetVals resets all changes to the "vals" field.
+func (m *DatapointMutation) ResetVals() {
+	m.vals = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -332,43 +312,43 @@ func (m *DatapointMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetParametersID sets the "parameters" edge to the Parameter entity by id.
-func (m *DatapointMutation) SetParametersID(id uuid.UUID) {
-	m.parameters = &id
+// SetDatasetsID sets the "datasets" edge to the Dataset entity by id.
+func (m *DatapointMutation) SetDatasetsID(id uuid.UUID) {
+	m.datasets = &id
 }
 
-// ClearParameters clears the "parameters" edge to the Parameter entity.
-func (m *DatapointMutation) ClearParameters() {
-	m.clearedparameters = true
+// ClearDatasets clears the "datasets" edge to the Dataset entity.
+func (m *DatapointMutation) ClearDatasets() {
+	m.cleareddatasets = true
 }
 
-// ParametersCleared reports if the "parameters" edge to the Parameter entity was cleared.
-func (m *DatapointMutation) ParametersCleared() bool {
-	return m.ParameterIDCleared() || m.clearedparameters
+// DatasetsCleared reports if the "datasets" edge to the Dataset entity was cleared.
+func (m *DatapointMutation) DatasetsCleared() bool {
+	return m.DatasetIDCleared() || m.cleareddatasets
 }
 
-// ParametersID returns the "parameters" edge ID in the mutation.
-func (m *DatapointMutation) ParametersID() (id uuid.UUID, exists bool) {
-	if m.parameters != nil {
-		return *m.parameters, true
+// DatasetsID returns the "datasets" edge ID in the mutation.
+func (m *DatapointMutation) DatasetsID() (id uuid.UUID, exists bool) {
+	if m.datasets != nil {
+		return *m.datasets, true
 	}
 	return
 }
 
-// ParametersIDs returns the "parameters" edge IDs in the mutation.
+// DatasetsIDs returns the "datasets" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ParametersID instead. It exists only for internal usage by the builders.
-func (m *DatapointMutation) ParametersIDs() (ids []uuid.UUID) {
-	if id := m.parameters; id != nil {
+// DatasetsID instead. It exists only for internal usage by the builders.
+func (m *DatapointMutation) DatasetsIDs() (ids []uuid.UUID) {
+	if id := m.datasets; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetParameters resets all changes to the "parameters" edge.
-func (m *DatapointMutation) ResetParameters() {
-	m.parameters = nil
-	m.clearedparameters = false
+// ResetDatasets resets all changes to the "datasets" edge.
+func (m *DatapointMutation) ResetDatasets() {
+	m.datasets = nil
+	m.cleareddatasets = false
 }
 
 // Where appends a list predicates to the DatapointMutation builder.
@@ -409,11 +389,11 @@ func (m *DatapointMutation) Fields() []string {
 	if m.data_time != nil {
 		fields = append(fields, datapoint.FieldDataTime)
 	}
-	if m.parameters != nil {
-		fields = append(fields, datapoint.FieldParameterID)
+	if m.datasets != nil {
+		fields = append(fields, datapoint.FieldDatasetID)
 	}
-	if m.val != nil {
-		fields = append(fields, datapoint.FieldVal)
+	if m.vals != nil {
+		fields = append(fields, datapoint.FieldVals)
 	}
 	if m.created_at != nil {
 		fields = append(fields, datapoint.FieldCreatedAt)
@@ -428,10 +408,10 @@ func (m *DatapointMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case datapoint.FieldDataTime:
 		return m.DataTime()
-	case datapoint.FieldParameterID:
-		return m.ParameterID()
-	case datapoint.FieldVal:
-		return m.Val()
+	case datapoint.FieldDatasetID:
+		return m.DatasetID()
+	case datapoint.FieldVals:
+		return m.Vals()
 	case datapoint.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -445,10 +425,10 @@ func (m *DatapointMutation) OldField(ctx context.Context, name string) (ent.Valu
 	switch name {
 	case datapoint.FieldDataTime:
 		return m.OldDataTime(ctx)
-	case datapoint.FieldParameterID:
-		return m.OldParameterID(ctx)
-	case datapoint.FieldVal:
-		return m.OldVal(ctx)
+	case datapoint.FieldDatasetID:
+		return m.OldDatasetID(ctx)
+	case datapoint.FieldVals:
+		return m.OldVals(ctx)
 	case datapoint.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -467,19 +447,19 @@ func (m *DatapointMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDataTime(v)
 		return nil
-	case datapoint.FieldParameterID:
+	case datapoint.FieldDatasetID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetParameterID(v)
+		m.SetDatasetID(v)
 		return nil
-	case datapoint.FieldVal:
-		v, ok := value.(float64)
+	case datapoint.FieldVals:
+		v, ok := value.(schema.DataT)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetVal(v)
+		m.SetVals(v)
 		return nil
 	case datapoint.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -495,21 +475,13 @@ func (m *DatapointMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *DatapointMutation) AddedFields() []string {
-	var fields []string
-	if m.addval != nil {
-		fields = append(fields, datapoint.FieldVal)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *DatapointMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case datapoint.FieldVal:
-		return m.AddedVal()
-	}
 	return nil, false
 }
 
@@ -518,13 +490,6 @@ func (m *DatapointMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *DatapointMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case datapoint.FieldVal:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddVal(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Datapoint numeric field %s", name)
 }
@@ -533,8 +498,8 @@ func (m *DatapointMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *DatapointMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(datapoint.FieldParameterID) {
-		fields = append(fields, datapoint.FieldParameterID)
+	if m.FieldCleared(datapoint.FieldDatasetID) {
+		fields = append(fields, datapoint.FieldDatasetID)
 	}
 	return fields
 }
@@ -550,8 +515,8 @@ func (m *DatapointMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *DatapointMutation) ClearField(name string) error {
 	switch name {
-	case datapoint.FieldParameterID:
-		m.ClearParameterID()
+	case datapoint.FieldDatasetID:
+		m.ClearDatasetID()
 		return nil
 	}
 	return fmt.Errorf("unknown Datapoint nullable field %s", name)
@@ -564,11 +529,11 @@ func (m *DatapointMutation) ResetField(name string) error {
 	case datapoint.FieldDataTime:
 		m.ResetDataTime()
 		return nil
-	case datapoint.FieldParameterID:
-		m.ResetParameterID()
+	case datapoint.FieldDatasetID:
+		m.ResetDatasetID()
 		return nil
-	case datapoint.FieldVal:
-		m.ResetVal()
+	case datapoint.FieldVals:
+		m.ResetVals()
 		return nil
 	case datapoint.FieldCreatedAt:
 		m.ResetCreatedAt()
@@ -580,8 +545,8 @@ func (m *DatapointMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DatapointMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.parameters != nil {
-		edges = append(edges, datapoint.EdgeParameters)
+	if m.datasets != nil {
+		edges = append(edges, datapoint.EdgeDatasets)
 	}
 	return edges
 }
@@ -590,8 +555,8 @@ func (m *DatapointMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *DatapointMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case datapoint.EdgeParameters:
-		if id := m.parameters; id != nil {
+	case datapoint.EdgeDatasets:
+		if id := m.datasets; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -613,8 +578,8 @@ func (m *DatapointMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DatapointMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedparameters {
-		edges = append(edges, datapoint.EdgeParameters)
+	if m.cleareddatasets {
+		edges = append(edges, datapoint.EdgeDatasets)
 	}
 	return edges
 }
@@ -623,8 +588,8 @@ func (m *DatapointMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *DatapointMutation) EdgeCleared(name string) bool {
 	switch name {
-	case datapoint.EdgeParameters:
-		return m.clearedparameters
+	case datapoint.EdgeDatasets:
+		return m.cleareddatasets
 	}
 	return false
 }
@@ -633,8 +598,8 @@ func (m *DatapointMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *DatapointMutation) ClearEdge(name string) error {
 	switch name {
-	case datapoint.EdgeParameters:
-		m.ClearParameters()
+	case datapoint.EdgeDatasets:
+		m.ClearDatasets()
 		return nil
 	}
 	return fmt.Errorf("unknown Datapoint unique edge %s", name)
@@ -644,8 +609,8 @@ func (m *DatapointMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *DatapointMutation) ResetEdge(name string) error {
 	switch name {
-	case datapoint.EdgeParameters:
-		m.ResetParameters()
+	case datapoint.EdgeDatasets:
+		m.ResetDatasets()
 		return nil
 	}
 	return fmt.Errorf("unknown Datapoint edge %s", name)
@@ -663,6 +628,9 @@ type DatasetMutation struct {
 	parameters        map[uuid.UUID]struct{}
 	removedparameters map[uuid.UUID]struct{}
 	clearedparameters bool
+	datapoints        map[uuid.UUID]struct{}
+	removeddatapoints map[uuid.UUID]struct{}
+	cleareddatapoints bool
 	done              bool
 	oldValue          func(context.Context) (*Dataset, error)
 	predicates        []predicate.Dataset
@@ -898,6 +866,60 @@ func (m *DatasetMutation) ResetParameters() {
 	m.removedparameters = nil
 }
 
+// AddDatapointIDs adds the "datapoints" edge to the Datapoint entity by ids.
+func (m *DatasetMutation) AddDatapointIDs(ids ...uuid.UUID) {
+	if m.datapoints == nil {
+		m.datapoints = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.datapoints[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDatapoints clears the "datapoints" edge to the Datapoint entity.
+func (m *DatasetMutation) ClearDatapoints() {
+	m.cleareddatapoints = true
+}
+
+// DatapointsCleared reports if the "datapoints" edge to the Datapoint entity was cleared.
+func (m *DatasetMutation) DatapointsCleared() bool {
+	return m.cleareddatapoints
+}
+
+// RemoveDatapointIDs removes the "datapoints" edge to the Datapoint entity by IDs.
+func (m *DatasetMutation) RemoveDatapointIDs(ids ...uuid.UUID) {
+	if m.removeddatapoints == nil {
+		m.removeddatapoints = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.datapoints, ids[i])
+		m.removeddatapoints[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDatapoints returns the removed IDs of the "datapoints" edge to the Datapoint entity.
+func (m *DatasetMutation) RemovedDatapointsIDs() (ids []uuid.UUID) {
+	for id := range m.removeddatapoints {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DatapointsIDs returns the "datapoints" edge IDs in the mutation.
+func (m *DatasetMutation) DatapointsIDs() (ids []uuid.UUID) {
+	for id := range m.datapoints {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDatapoints resets all changes to the "datapoints" edge.
+func (m *DatasetMutation) ResetDatapoints() {
+	m.datapoints = nil
+	m.cleareddatapoints = false
+	m.removeddatapoints = nil
+}
+
 // Where appends a list predicates to the DatasetMutation builder.
 func (m *DatasetMutation) Where(ps ...predicate.Dataset) {
 	m.predicates = append(m.predicates, ps...)
@@ -1048,9 +1070,12 @@ func (m *DatasetMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DatasetMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.parameters != nil {
 		edges = append(edges, dataset.EdgeParameters)
+	}
+	if m.datapoints != nil {
+		edges = append(edges, dataset.EdgeDatapoints)
 	}
 	return edges
 }
@@ -1065,15 +1090,24 @@ func (m *DatasetMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case dataset.EdgeDatapoints:
+		ids := make([]ent.Value, 0, len(m.datapoints))
+		for id := range m.datapoints {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DatasetMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedparameters != nil {
 		edges = append(edges, dataset.EdgeParameters)
+	}
+	if m.removeddatapoints != nil {
+		edges = append(edges, dataset.EdgeDatapoints)
 	}
 	return edges
 }
@@ -1088,15 +1122,24 @@ func (m *DatasetMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case dataset.EdgeDatapoints:
+		ids := make([]ent.Value, 0, len(m.removeddatapoints))
+		for id := range m.removeddatapoints {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DatasetMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedparameters {
 		edges = append(edges, dataset.EdgeParameters)
+	}
+	if m.cleareddatapoints {
+		edges = append(edges, dataset.EdgeDatapoints)
 	}
 	return edges
 }
@@ -1107,6 +1150,8 @@ func (m *DatasetMutation) EdgeCleared(name string) bool {
 	switch name {
 	case dataset.EdgeParameters:
 		return m.clearedparameters
+	case dataset.EdgeDatapoints:
+		return m.cleareddatapoints
 	}
 	return false
 }
@@ -1126,6 +1171,9 @@ func (m *DatasetMutation) ResetEdge(name string) error {
 	case dataset.EdgeParameters:
 		m.ResetParameters()
 		return nil
+	case dataset.EdgeDatapoints:
+		m.ResetDatapoints()
+		return nil
 	}
 	return fmt.Errorf("unknown Dataset edge %s", name)
 }
@@ -1133,21 +1181,18 @@ func (m *DatasetMutation) ResetEdge(name string) error {
 // ParameterMutation represents an operation that mutates the Parameter nodes in the graph.
 type ParameterMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *uuid.UUID
-	name              *string
-	unit              *string
-	created_at        *time.Time
-	clearedFields     map[string]struct{}
-	datasets          *uuid.UUID
-	cleareddatasets   bool
-	datapoints        map[uuid.UUID]struct{}
-	removeddatapoints map[uuid.UUID]struct{}
-	cleareddatapoints bool
-	done              bool
-	oldValue          func(context.Context) (*Parameter, error)
-	predicates        []predicate.Parameter
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	name            *string
+	unit            *string
+	created_at      *time.Time
+	clearedFields   map[string]struct{}
+	datasets        *uuid.UUID
+	cleareddatasets bool
+	done            bool
+	oldValue        func(context.Context) (*Parameter, error)
+	predicates      []predicate.Parameter
 }
 
 var _ ent.Mutation = (*ParameterMutation)(nil)
@@ -1450,60 +1495,6 @@ func (m *ParameterMutation) ResetDatasets() {
 	m.cleareddatasets = false
 }
 
-// AddDatapointIDs adds the "datapoints" edge to the Datapoint entity by ids.
-func (m *ParameterMutation) AddDatapointIDs(ids ...uuid.UUID) {
-	if m.datapoints == nil {
-		m.datapoints = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.datapoints[ids[i]] = struct{}{}
-	}
-}
-
-// ClearDatapoints clears the "datapoints" edge to the Datapoint entity.
-func (m *ParameterMutation) ClearDatapoints() {
-	m.cleareddatapoints = true
-}
-
-// DatapointsCleared reports if the "datapoints" edge to the Datapoint entity was cleared.
-func (m *ParameterMutation) DatapointsCleared() bool {
-	return m.cleareddatapoints
-}
-
-// RemoveDatapointIDs removes the "datapoints" edge to the Datapoint entity by IDs.
-func (m *ParameterMutation) RemoveDatapointIDs(ids ...uuid.UUID) {
-	if m.removeddatapoints == nil {
-		m.removeddatapoints = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.datapoints, ids[i])
-		m.removeddatapoints[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedDatapoints returns the removed IDs of the "datapoints" edge to the Datapoint entity.
-func (m *ParameterMutation) RemovedDatapointsIDs() (ids []uuid.UUID) {
-	for id := range m.removeddatapoints {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// DatapointsIDs returns the "datapoints" edge IDs in the mutation.
-func (m *ParameterMutation) DatapointsIDs() (ids []uuid.UUID) {
-	for id := range m.datapoints {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetDatapoints resets all changes to the "datapoints" edge.
-func (m *ParameterMutation) ResetDatapoints() {
-	m.datapoints = nil
-	m.cleareddatapoints = false
-	m.removeddatapoints = nil
-}
-
 // Where appends a list predicates to the ParameterMutation builder.
 func (m *ParameterMutation) Where(ps ...predicate.Parameter) {
 	m.predicates = append(m.predicates, ps...)
@@ -1697,12 +1688,9 @@ func (m *ParameterMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ParameterMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.datasets != nil {
 		edges = append(edges, parameter.EdgeDatasets)
-	}
-	if m.datapoints != nil {
-		edges = append(edges, parameter.EdgeDatapoints)
 	}
 	return edges
 }
@@ -1715,47 +1703,27 @@ func (m *ParameterMutation) AddedIDs(name string) []ent.Value {
 		if id := m.datasets; id != nil {
 			return []ent.Value{*id}
 		}
-	case parameter.EdgeDatapoints:
-		ids := make([]ent.Value, 0, len(m.datapoints))
-		for id := range m.datapoints {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ParameterMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removeddatapoints != nil {
-		edges = append(edges, parameter.EdgeDatapoints)
-	}
+	edges := make([]string, 0, 1)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ParameterMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case parameter.EdgeDatapoints:
-		ids := make([]ent.Value, 0, len(m.removeddatapoints))
-		for id := range m.removeddatapoints {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ParameterMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.cleareddatasets {
 		edges = append(edges, parameter.EdgeDatasets)
-	}
-	if m.cleareddatapoints {
-		edges = append(edges, parameter.EdgeDatapoints)
 	}
 	return edges
 }
@@ -1766,8 +1734,6 @@ func (m *ParameterMutation) EdgeCleared(name string) bool {
 	switch name {
 	case parameter.EdgeDatasets:
 		return m.cleareddatasets
-	case parameter.EdgeDatapoints:
-		return m.cleareddatapoints
 	}
 	return false
 }
@@ -1789,9 +1755,6 @@ func (m *ParameterMutation) ResetEdge(name string) error {
 	switch name {
 	case parameter.EdgeDatasets:
 		m.ResetDatasets()
-		return nil
-	case parameter.EdgeDatapoints:
-		m.ResetDatapoints()
 		return nil
 	}
 	return fmt.Errorf("unknown Parameter edge %s", name)

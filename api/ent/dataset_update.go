@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/predicate"
@@ -65,6 +66,21 @@ func (du *DatasetUpdate) AddParameters(p ...*Parameter) *DatasetUpdate {
 	return du.AddParameterIDs(ids...)
 }
 
+// AddDatapointIDs adds the "datapoints" edge to the Datapoint entity by IDs.
+func (du *DatasetUpdate) AddDatapointIDs(ids ...uuid.UUID) *DatasetUpdate {
+	du.mutation.AddDatapointIDs(ids...)
+	return du
+}
+
+// AddDatapoints adds the "datapoints" edges to the Datapoint entity.
+func (du *DatasetUpdate) AddDatapoints(d ...*Datapoint) *DatasetUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return du.AddDatapointIDs(ids...)
+}
+
 // Mutation returns the DatasetMutation object of the builder.
 func (du *DatasetUpdate) Mutation() *DatasetMutation {
 	return du.mutation
@@ -89,6 +105,27 @@ func (du *DatasetUpdate) RemoveParameters(p ...*Parameter) *DatasetUpdate {
 		ids[i] = p[i].ID
 	}
 	return du.RemoveParameterIDs(ids...)
+}
+
+// ClearDatapoints clears all "datapoints" edges to the Datapoint entity.
+func (du *DatasetUpdate) ClearDatapoints() *DatasetUpdate {
+	du.mutation.ClearDatapoints()
+	return du
+}
+
+// RemoveDatapointIDs removes the "datapoints" edge to Datapoint entities by IDs.
+func (du *DatasetUpdate) RemoveDatapointIDs(ids ...uuid.UUID) *DatasetUpdate {
+	du.mutation.RemoveDatapointIDs(ids...)
+	return du
+}
+
+// RemoveDatapoints removes "datapoints" edges to Datapoint entities.
+func (du *DatasetUpdate) RemoveDatapoints(d ...*Datapoint) *DatasetUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return du.RemoveDatapointIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -196,6 +233,60 @@ func (du *DatasetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if du.mutation.DatapointsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dataset.DatapointsTable,
+			Columns: []string{dataset.DatapointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: datapoint.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.RemovedDatapointsIDs(); len(nodes) > 0 && !du.mutation.DatapointsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dataset.DatapointsTable,
+			Columns: []string{dataset.DatapointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: datapoint.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.DatapointsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dataset.DatapointsTable,
+			Columns: []string{dataset.DatapointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: datapoint.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, du.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{dataset.Label}
@@ -251,6 +342,21 @@ func (duo *DatasetUpdateOne) AddParameters(p ...*Parameter) *DatasetUpdateOne {
 	return duo.AddParameterIDs(ids...)
 }
 
+// AddDatapointIDs adds the "datapoints" edge to the Datapoint entity by IDs.
+func (duo *DatasetUpdateOne) AddDatapointIDs(ids ...uuid.UUID) *DatasetUpdateOne {
+	duo.mutation.AddDatapointIDs(ids...)
+	return duo
+}
+
+// AddDatapoints adds the "datapoints" edges to the Datapoint entity.
+func (duo *DatasetUpdateOne) AddDatapoints(d ...*Datapoint) *DatasetUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return duo.AddDatapointIDs(ids...)
+}
+
 // Mutation returns the DatasetMutation object of the builder.
 func (duo *DatasetUpdateOne) Mutation() *DatasetMutation {
 	return duo.mutation
@@ -275,6 +381,27 @@ func (duo *DatasetUpdateOne) RemoveParameters(p ...*Parameter) *DatasetUpdateOne
 		ids[i] = p[i].ID
 	}
 	return duo.RemoveParameterIDs(ids...)
+}
+
+// ClearDatapoints clears all "datapoints" edges to the Datapoint entity.
+func (duo *DatasetUpdateOne) ClearDatapoints() *DatasetUpdateOne {
+	duo.mutation.ClearDatapoints()
+	return duo
+}
+
+// RemoveDatapointIDs removes the "datapoints" edge to Datapoint entities by IDs.
+func (duo *DatasetUpdateOne) RemoveDatapointIDs(ids ...uuid.UUID) *DatasetUpdateOne {
+	duo.mutation.RemoveDatapointIDs(ids...)
+	return duo
+}
+
+// RemoveDatapoints removes "datapoints" edges to Datapoint entities.
+func (duo *DatasetUpdateOne) RemoveDatapoints(d ...*Datapoint) *DatasetUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return duo.RemoveDatapointIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -398,6 +525,60 @@ func (duo *DatasetUpdateOne) sqlSave(ctx context.Context) (_node *Dataset, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: parameter.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if duo.mutation.DatapointsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dataset.DatapointsTable,
+			Columns: []string{dataset.DatapointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: datapoint.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.RemovedDatapointsIDs(); len(nodes) > 0 && !duo.mutation.DatapointsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dataset.DatapointsTable,
+			Columns: []string{dataset.DatapointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: datapoint.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.DatapointsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   dataset.DatapointsTable,
+			Columns: []string{dataset.DatapointsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: datapoint.FieldID,
 				},
 			},
 		}

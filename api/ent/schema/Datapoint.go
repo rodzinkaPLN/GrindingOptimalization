@@ -18,9 +18,9 @@ func (Datapoint) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
 		field.Time("data_time"),
-		field.UUID("parameter_id", uuid.UUID{}).
+		field.UUID("dataset_id", uuid.UUID{}).
 			Optional(),
-		field.Float("val"),
+		field.JSON("vals", DataT{}),
 		field.Time("created_at").
 			Default(time.Now),
 	}
@@ -28,9 +28,9 @@ func (Datapoint) Fields() []ent.Field {
 
 func (Datapoint) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("parameters", Parameter.Type).
+		edge.From("datasets", Dataset.Type).
 			Ref("datapoints").
-			Field("parameter_id").
+			Field("dataset_id").
 			Unique(),
 	}
 }

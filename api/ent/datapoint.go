@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -10,7 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/schema"
 )
 
 // Datapoint is the model entity for the Datapoint schema.
@@ -20,10 +22,10 @@ type Datapoint struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// DataTime holds the value of the "data_time" field.
 	DataTime time.Time `json:"data_time,omitempty"`
-	// ParameterID holds the value of the "parameter_id" field.
-	ParameterID uuid.UUID `json:"parameter_id,omitempty"`
-	// Val holds the value of the "val" field.
-	Val float64 `json:"val,omitempty"`
+	// DatasetID holds the value of the "dataset_id" field.
+	DatasetID uuid.UUID `json:"dataset_id,omitempty"`
+	// Vals holds the value of the "vals" field.
+	Vals schema.DataT `json:"vals,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -33,24 +35,24 @@ type Datapoint struct {
 
 // DatapointEdges holds the relations/edges for other nodes in the graph.
 type DatapointEdges struct {
-	// Parameters holds the value of the parameters edge.
-	Parameters *Parameter `json:"parameters,omitempty"`
+	// Datasets holds the value of the datasets edge.
+	Datasets *Dataset `json:"datasets,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// ParametersOrErr returns the Parameters value or an error if the edge
+// DatasetsOrErr returns the Datasets value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e DatapointEdges) ParametersOrErr() (*Parameter, error) {
+func (e DatapointEdges) DatasetsOrErr() (*Dataset, error) {
 	if e.loadedTypes[0] {
-		if e.Parameters == nil {
+		if e.Datasets == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: parameter.Label}
+			return nil, &NotFoundError{label: dataset.Label}
 		}
-		return e.Parameters, nil
+		return e.Datasets, nil
 	}
-	return nil, &NotLoadedError{edge: "parameters"}
+	return nil, &NotLoadedError{edge: "datasets"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -58,11 +60,11 @@ func (*Datapoint) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case datapoint.FieldVal:
-			values[i] = new(sql.NullFloat64)
+		case datapoint.FieldVals:
+			values[i] = new([]byte)
 		case datapoint.FieldDataTime, datapoint.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case datapoint.FieldID, datapoint.FieldParameterID:
+		case datapoint.FieldID, datapoint.FieldDatasetID:
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Datapoint", columns[i])
@@ -91,17 +93,19 @@ func (d *Datapoint) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				d.DataTime = value.Time
 			}
-		case datapoint.FieldParameterID:
+		case datapoint.FieldDatasetID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field parameter_id", values[i])
+				return fmt.Errorf("unexpected type %T for field dataset_id", values[i])
 			} else if value != nil {
-				d.ParameterID = *value
+				d.DatasetID = *value
 			}
-		case datapoint.FieldVal:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field val", values[i])
-			} else if value.Valid {
-				d.Val = value.Float64
+		case datapoint.FieldVals:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field vals", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &d.Vals); err != nil {
+					return fmt.Errorf("unmarshal field vals: %w", err)
+				}
 			}
 		case datapoint.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -114,9 +118,9 @@ func (d *Datapoint) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// QueryParameters queries the "parameters" edge of the Datapoint entity.
-func (d *Datapoint) QueryParameters() *ParameterQuery {
-	return NewDatapointClient(d.config).QueryParameters(d)
+// QueryDatasets queries the "datasets" edge of the Datapoint entity.
+func (d *Datapoint) QueryDatasets() *DatasetQuery {
+	return NewDatapointClient(d.config).QueryDatasets(d)
 }
 
 // Update returns a builder for updating this Datapoint.
@@ -145,11 +149,11 @@ func (d *Datapoint) String() string {
 	builder.WriteString("data_time=")
 	builder.WriteString(d.DataTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("parameter_id=")
-	builder.WriteString(fmt.Sprintf("%v", d.ParameterID))
+	builder.WriteString("dataset_id=")
+	builder.WriteString(fmt.Sprintf("%v", d.DatasetID))
 	builder.WriteString(", ")
-	builder.WriteString("val=")
-	builder.WriteString(fmt.Sprintf("%v", d.Val))
+	builder.WriteString("vals=")
+	builder.WriteString(fmt.Sprintf("%v", d.Vals))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(d.CreatedAt.Format(time.ANSIC))

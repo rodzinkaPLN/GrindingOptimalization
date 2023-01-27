@@ -23,8 +23,6 @@ const (
 	FieldCreatedAt = "created_at"
 	// EdgeDatasets holds the string denoting the datasets edge name in mutations.
 	EdgeDatasets = "datasets"
-	// EdgeDatapoints holds the string denoting the datapoints edge name in mutations.
-	EdgeDatapoints = "datapoints"
 	// Table holds the table name of the parameter in the database.
 	Table = "parameters"
 	// DatasetsTable is the table that holds the datasets relation/edge.
@@ -34,13 +32,6 @@ const (
 	DatasetsInverseTable = "datasets"
 	// DatasetsColumn is the table column denoting the datasets relation/edge.
 	DatasetsColumn = "dataset_id"
-	// DatapointsTable is the table that holds the datapoints relation/edge.
-	DatapointsTable = "datapoints"
-	// DatapointsInverseTable is the table name for the Datapoint entity.
-	// It exists in this package in order to avoid circular dependency with the "datapoint" package.
-	DatapointsInverseTable = "datapoints"
-	// DatapointsColumn is the table column denoting the datapoints relation/edge.
-	DatapointsColumn = "parameter_id"
 )
 
 // Columns holds all SQL columns for parameter fields.

@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/predicate"
@@ -96,21 +95,6 @@ func (pu *ParameterUpdate) SetDatasets(d *Dataset) *ParameterUpdate {
 	return pu.SetDatasetsID(d.ID)
 }
 
-// AddDatapointIDs adds the "datapoints" edge to the Datapoint entity by IDs.
-func (pu *ParameterUpdate) AddDatapointIDs(ids ...uuid.UUID) *ParameterUpdate {
-	pu.mutation.AddDatapointIDs(ids...)
-	return pu
-}
-
-// AddDatapoints adds the "datapoints" edges to the Datapoint entity.
-func (pu *ParameterUpdate) AddDatapoints(d ...*Datapoint) *ParameterUpdate {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
-	}
-	return pu.AddDatapointIDs(ids...)
-}
-
 // Mutation returns the ParameterMutation object of the builder.
 func (pu *ParameterUpdate) Mutation() *ParameterMutation {
 	return pu.mutation
@@ -120,27 +104,6 @@ func (pu *ParameterUpdate) Mutation() *ParameterMutation {
 func (pu *ParameterUpdate) ClearDatasets() *ParameterUpdate {
 	pu.mutation.ClearDatasets()
 	return pu
-}
-
-// ClearDatapoints clears all "datapoints" edges to the Datapoint entity.
-func (pu *ParameterUpdate) ClearDatapoints() *ParameterUpdate {
-	pu.mutation.ClearDatapoints()
-	return pu
-}
-
-// RemoveDatapointIDs removes the "datapoints" edge to Datapoint entities by IDs.
-func (pu *ParameterUpdate) RemoveDatapointIDs(ids ...uuid.UUID) *ParameterUpdate {
-	pu.mutation.RemoveDatapointIDs(ids...)
-	return pu
-}
-
-// RemoveDatapoints removes "datapoints" edges to Datapoint entities.
-func (pu *ParameterUpdate) RemoveDatapoints(d ...*Datapoint) *ParameterUpdate {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
-	}
-	return pu.RemoveDatapointIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -224,60 +187,6 @@ func (pu *ParameterUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: dataset.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if pu.mutation.DatapointsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   parameter.DatapointsTable,
-			Columns: []string{parameter.DatapointsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: datapoint.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pu.mutation.RemovedDatapointsIDs(); len(nodes) > 0 && !pu.mutation.DatapointsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   parameter.DatapointsTable,
-			Columns: []string{parameter.DatapointsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: datapoint.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pu.mutation.DatapointsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   parameter.DatapointsTable,
-			Columns: []string{parameter.DatapointsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: datapoint.FieldID,
 				},
 			},
 		}
@@ -371,21 +280,6 @@ func (puo *ParameterUpdateOne) SetDatasets(d *Dataset) *ParameterUpdateOne {
 	return puo.SetDatasetsID(d.ID)
 }
 
-// AddDatapointIDs adds the "datapoints" edge to the Datapoint entity by IDs.
-func (puo *ParameterUpdateOne) AddDatapointIDs(ids ...uuid.UUID) *ParameterUpdateOne {
-	puo.mutation.AddDatapointIDs(ids...)
-	return puo
-}
-
-// AddDatapoints adds the "datapoints" edges to the Datapoint entity.
-func (puo *ParameterUpdateOne) AddDatapoints(d ...*Datapoint) *ParameterUpdateOne {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
-	}
-	return puo.AddDatapointIDs(ids...)
-}
-
 // Mutation returns the ParameterMutation object of the builder.
 func (puo *ParameterUpdateOne) Mutation() *ParameterMutation {
 	return puo.mutation
@@ -395,27 +289,6 @@ func (puo *ParameterUpdateOne) Mutation() *ParameterMutation {
 func (puo *ParameterUpdateOne) ClearDatasets() *ParameterUpdateOne {
 	puo.mutation.ClearDatasets()
 	return puo
-}
-
-// ClearDatapoints clears all "datapoints" edges to the Datapoint entity.
-func (puo *ParameterUpdateOne) ClearDatapoints() *ParameterUpdateOne {
-	puo.mutation.ClearDatapoints()
-	return puo
-}
-
-// RemoveDatapointIDs removes the "datapoints" edge to Datapoint entities by IDs.
-func (puo *ParameterUpdateOne) RemoveDatapointIDs(ids ...uuid.UUID) *ParameterUpdateOne {
-	puo.mutation.RemoveDatapointIDs(ids...)
-	return puo
-}
-
-// RemoveDatapoints removes "datapoints" edges to Datapoint entities.
-func (puo *ParameterUpdateOne) RemoveDatapoints(d ...*Datapoint) *ParameterUpdateOne {
-	ids := make([]uuid.UUID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
-	}
-	return puo.RemoveDatapointIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -523,60 +396,6 @@ func (puo *ParameterUpdateOne) sqlSave(ctx context.Context) (_node *Parameter, e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: dataset.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if puo.mutation.DatapointsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   parameter.DatapointsTable,
-			Columns: []string{parameter.DatapointsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: datapoint.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := puo.mutation.RemovedDatapointsIDs(); len(nodes) > 0 && !puo.mutation.DatapointsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   parameter.DatapointsTable,
-			Columns: []string{parameter.DatapointsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: datapoint.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := puo.mutation.DatapointsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   parameter.DatapointsTable,
-			Columns: []string{parameter.DatapointsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: datapoint.FieldID,
 				},
 			},
 		}

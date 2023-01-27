@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/predicate"
@@ -21,12 +19,11 @@ import (
 // ParameterQuery is the builder for querying Parameter entities.
 type ParameterQuery struct {
 	config
-	ctx            *QueryContext
-	order          []OrderFunc
-	inters         []Interceptor
-	predicates     []predicate.Parameter
-	withDatasets   *DatasetQuery
-	withDatapoints *DatapointQuery
+	ctx          *QueryContext
+	order        []OrderFunc
+	inters       []Interceptor
+	predicates   []predicate.Parameter
+	withDatasets *DatasetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -78,28 +75,6 @@ func (pq *ParameterQuery) QueryDatasets() *DatasetQuery {
 			sqlgraph.From(parameter.Table, parameter.FieldID, selector),
 			sqlgraph.To(dataset.Table, dataset.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, parameter.DatasetsTable, parameter.DatasetsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryDatapoints chains the current query on the "datapoints" edge.
-func (pq *ParameterQuery) QueryDatapoints() *DatapointQuery {
-	query := (&DatapointClient{config: pq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := pq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(parameter.Table, parameter.FieldID, selector),
-			sqlgraph.To(datapoint.Table, datapoint.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, parameter.DatapointsTable, parameter.DatapointsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -292,13 +267,12 @@ func (pq *ParameterQuery) Clone() *ParameterQuery {
 		return nil
 	}
 	return &ParameterQuery{
-		config:         pq.config,
-		ctx:            pq.ctx.Clone(),
-		order:          append([]OrderFunc{}, pq.order...),
-		inters:         append([]Interceptor{}, pq.inters...),
-		predicates:     append([]predicate.Parameter{}, pq.predicates...),
-		withDatasets:   pq.withDatasets.Clone(),
-		withDatapoints: pq.withDatapoints.Clone(),
+		config:       pq.config,
+		ctx:          pq.ctx.Clone(),
+		order:        append([]OrderFunc{}, pq.order...),
+		inters:       append([]Interceptor{}, pq.inters...),
+		predicates:   append([]predicate.Parameter{}, pq.predicates...),
+		withDatasets: pq.withDatasets.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -313,17 +287,6 @@ func (pq *ParameterQuery) WithDatasets(opts ...func(*DatasetQuery)) *ParameterQu
 		opt(query)
 	}
 	pq.withDatasets = query
-	return pq
-}
-
-// WithDatapoints tells the query-builder to eager-load the nodes that are connected to
-// the "datapoints" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *ParameterQuery) WithDatapoints(opts ...func(*DatapointQuery)) *ParameterQuery {
-	query := (&DatapointClient{config: pq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	pq.withDatapoints = query
 	return pq
 }
 
@@ -405,9 +368,8 @@ func (pq *ParameterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pa
 	var (
 		nodes       = []*Parameter{}
 		_spec       = pq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [1]bool{
 			pq.withDatasets != nil,
-			pq.withDatapoints != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -431,13 +393,6 @@ func (pq *ParameterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pa
 	if query := pq.withDatasets; query != nil {
 		if err := pq.loadDatasets(ctx, query, nodes, nil,
 			func(n *Parameter, e *Dataset) { n.Edges.Datasets = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := pq.withDatapoints; query != nil {
-		if err := pq.loadDatapoints(ctx, query, nodes,
-			func(n *Parameter) { n.Edges.Datapoints = []*Datapoint{} },
-			func(n *Parameter, e *Datapoint) { n.Edges.Datapoints = append(n.Edges.Datapoints, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -470,33 +425,6 @@ func (pq *ParameterQuery) loadDatasets(ctx context.Context, query *DatasetQuery,
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
-	}
-	return nil
-}
-func (pq *ParameterQuery) loadDatapoints(ctx context.Context, query *DatapointQuery, nodes []*Parameter, init func(*Parameter), assign func(*Parameter, *Datapoint)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Parameter)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.Where(predicate.Datapoint(func(s *sql.Selector) {
-		s.Where(sql.InValues(parameter.DatapointsColumn, fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ParameterID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "parameter_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }

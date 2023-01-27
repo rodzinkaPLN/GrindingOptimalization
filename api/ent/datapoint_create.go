@@ -12,7 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/schema"
 )
 
 // DatapointCreate is the builder for creating a Datapoint entity.
@@ -28,23 +29,23 @@ func (dc *DatapointCreate) SetDataTime(t time.Time) *DatapointCreate {
 	return dc
 }
 
-// SetParameterID sets the "parameter_id" field.
-func (dc *DatapointCreate) SetParameterID(u uuid.UUID) *DatapointCreate {
-	dc.mutation.SetParameterID(u)
+// SetDatasetID sets the "dataset_id" field.
+func (dc *DatapointCreate) SetDatasetID(u uuid.UUID) *DatapointCreate {
+	dc.mutation.SetDatasetID(u)
 	return dc
 }
 
-// SetNillableParameterID sets the "parameter_id" field if the given value is not nil.
-func (dc *DatapointCreate) SetNillableParameterID(u *uuid.UUID) *DatapointCreate {
+// SetNillableDatasetID sets the "dataset_id" field if the given value is not nil.
+func (dc *DatapointCreate) SetNillableDatasetID(u *uuid.UUID) *DatapointCreate {
 	if u != nil {
-		dc.SetParameterID(*u)
+		dc.SetDatasetID(*u)
 	}
 	return dc
 }
 
-// SetVal sets the "val" field.
-func (dc *DatapointCreate) SetVal(f float64) *DatapointCreate {
-	dc.mutation.SetVal(f)
+// SetVals sets the "vals" field.
+func (dc *DatapointCreate) SetVals(s schema.DataT) *DatapointCreate {
+	dc.mutation.SetVals(s)
 	return dc
 }
 
@@ -76,23 +77,23 @@ func (dc *DatapointCreate) SetNillableID(u *uuid.UUID) *DatapointCreate {
 	return dc
 }
 
-// SetParametersID sets the "parameters" edge to the Parameter entity by ID.
-func (dc *DatapointCreate) SetParametersID(id uuid.UUID) *DatapointCreate {
-	dc.mutation.SetParametersID(id)
+// SetDatasetsID sets the "datasets" edge to the Dataset entity by ID.
+func (dc *DatapointCreate) SetDatasetsID(id uuid.UUID) *DatapointCreate {
+	dc.mutation.SetDatasetsID(id)
 	return dc
 }
 
-// SetNillableParametersID sets the "parameters" edge to the Parameter entity by ID if the given value is not nil.
-func (dc *DatapointCreate) SetNillableParametersID(id *uuid.UUID) *DatapointCreate {
+// SetNillableDatasetsID sets the "datasets" edge to the Dataset entity by ID if the given value is not nil.
+func (dc *DatapointCreate) SetNillableDatasetsID(id *uuid.UUID) *DatapointCreate {
 	if id != nil {
-		dc = dc.SetParametersID(*id)
+		dc = dc.SetDatasetsID(*id)
 	}
 	return dc
 }
 
-// SetParameters sets the "parameters" edge to the Parameter entity.
-func (dc *DatapointCreate) SetParameters(p *Parameter) *DatapointCreate {
-	return dc.SetParametersID(p.ID)
+// SetDatasets sets the "datasets" edge to the Dataset entity.
+func (dc *DatapointCreate) SetDatasets(d *Dataset) *DatapointCreate {
+	return dc.SetDatasetsID(d.ID)
 }
 
 // Mutation returns the DatapointMutation object of the builder.
@@ -145,8 +146,8 @@ func (dc *DatapointCreate) check() error {
 	if _, ok := dc.mutation.DataTime(); !ok {
 		return &ValidationError{Name: "data_time", err: errors.New(`ent: missing required field "Datapoint.data_time"`)}
 	}
-	if _, ok := dc.mutation.Val(); !ok {
-		return &ValidationError{Name: "val", err: errors.New(`ent: missing required field "Datapoint.val"`)}
+	if _, ok := dc.mutation.Vals(); !ok {
+		return &ValidationError{Name: "vals", err: errors.New(`ent: missing required field "Datapoint.vals"`)}
 	}
 	if _, ok := dc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Datapoint.created_at"`)}
@@ -196,32 +197,32 @@ func (dc *DatapointCreate) createSpec() (*Datapoint, *sqlgraph.CreateSpec) {
 		_spec.SetField(datapoint.FieldDataTime, field.TypeTime, value)
 		_node.DataTime = value
 	}
-	if value, ok := dc.mutation.Val(); ok {
-		_spec.SetField(datapoint.FieldVal, field.TypeFloat64, value)
-		_node.Val = value
+	if value, ok := dc.mutation.Vals(); ok {
+		_spec.SetField(datapoint.FieldVals, field.TypeJSON, value)
+		_node.Vals = value
 	}
 	if value, ok := dc.mutation.CreatedAt(); ok {
 		_spec.SetField(datapoint.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := dc.mutation.ParametersIDs(); len(nodes) > 0 {
+	if nodes := dc.mutation.DatasetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   datapoint.ParametersTable,
-			Columns: []string{datapoint.ParametersColumn},
+			Table:   datapoint.DatasetsTable,
+			Columns: []string{datapoint.DatasetsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: parameter.FieldID,
+					Column: dataset.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ParameterID = nodes[0]
+		_node.DatasetID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

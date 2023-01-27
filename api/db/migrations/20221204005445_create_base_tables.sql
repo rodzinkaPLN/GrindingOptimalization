@@ -19,8 +19,8 @@ CREATE TABLE parameters(
 CREATE TABLE datapoints (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     data_time timestamptz,
-    parameter_id uuid references parameters(id),
-    val double precision,
+    dataset_id uuid references datasets(id),
+    vals JSONB,
     created_at timestamptz
 );
 

@@ -1,10 +1,6 @@
 package model
 
 import (
-	"sort"
-	"strconv"
-	"time"
-
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent"
 )
 
@@ -15,49 +11,28 @@ type Parameter struct {
 }
 type Dashboard struct {
 	Parameters []Parameter              `json:"parameters"`
-	Data       []map[string]interface{} `json:"data"	`
+	Data       []map[string]interface{} `json:"data"`
 }
 
-func DashboardFromEntParameters(ins []*ent.Parameter) Dashboard {
-	out := Dashboard{}
+func DashboardFromEntDataset(in *ent.Dataset) Dashboard {
+	out := Dashboard{
+		Parameters: make([]Parameter, len(in.Edges.Parameters)),
+		Data:       make([]map[string]interface{}, len(in.Edges.Datapoints)),
+	}
 
-	d := make(map[time.Time]map[string]float64)
-
-	for i, v := range ins {
-		key := strconv.Itoa(i)
-		out.Parameters = append(out.Parameters, Parameter{
+	for i, v := range in.Edges.Parameters {
+		out.Parameters[i] = Parameter{
 			Unit: v.Unit,
 			Name: v.Name,
-			Key:  key,
-		})
-
-		for _, vv := range v.Edges.Datapoints {
-			if _, ok := d[vv.DataTime]; !ok {
-				d[vv.DataTime] = make(map[string]float64)
-			}
-			d[vv.DataTime][key] = vv.Val
+			Key:  v.Name,
 		}
 	}
-
-	dd := make([]time.Time, 0, len(d))
-	for k := range d {
-		dd = append(dd, k)
-	}
-	sort.Slice(dd, func(i, j int) bool {
-		return dd[i].Before(dd[j])
-	})
-
-	out.Data = make([]map[string]interface{}, len(dd))
-	for i, t := range dd {
-		dataCol := make(map[string]interface{})
-		dataCol["ts"] = t
-
-		for ii, v := range d[t] {
-			dataCol[ii] = v
+	for i, v := range in.Edges.Datapoints {
+		out.Data[i] = make(map[string]interface{})
+		out.Data[i]["Data"] = v.DataTime
+		for key, val := range v.Vals {
+			out.Data[i][key] = val
 		}
-
-		out.Data[i] = dataCol
 	}
-
 	return out
 }

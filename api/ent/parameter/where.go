@@ -303,33 +303,6 @@ func HasDatasetsWith(preds ...predicate.Dataset) predicate.Parameter {
 	})
 }
 
-// HasDatapoints applies the HasEdge predicate on the "datapoints" edge.
-func HasDatapoints() predicate.Parameter {
-	return predicate.Parameter(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, DatapointsTable, DatapointsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasDatapointsWith applies the HasEdge predicate on the "datapoints" edge with a given conditions (other predicates).
-func HasDatapointsWith(preds ...predicate.Datapoint) predicate.Parameter {
-	return predicate.Parameter(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(DatapointsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, DatapointsTable, DatapointsColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Parameter) predicate.Parameter {
 	return predicate.Parameter(func(s *sql.Selector) {

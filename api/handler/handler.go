@@ -1,13 +1,15 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/db"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent"
-	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/model"
 )
 
@@ -22,13 +24,9 @@ func NewCrudHandler(dbc *db.DB) *CrudHandler {
 }
 
 type requestGetDatapoints struct {
-	Parameters []string  `query:"parameters"`
-	From       time.Time `query:"from"`
-	To         time.Time `query:"to"`
-}
-
-type responseGetDatapoints struct {
-	Parameters []model.Parameter `json:"parameters"`
+	Dataset string    `query:"dataset"`
+	From    time.Time `query:"from"`
+	To      time.Time `query:"to"`
 }
 
 func (h *CrudHandler) GetDataPoints(c echo.Context) error {
@@ -42,17 +40,19 @@ func (h *CrudHandler) GetDataPoints(c echo.Context) error {
 		return err
 	}
 
-	parameters, err := h.db.Parameter.Query().Where(
-		parameter.NameIn(req.Parameters...),
+	dataset, err := h.db.Dataset.Query().Where(
+		dataset.NameEQ(req.Dataset),
 	).WithDatapoints(
 		func(q *ent.DatapointQuery) {
 			q.Limit(100)
+			q.Order(ent.Asc(datapoint.FieldDataTime))
 		},
-	).
-		All(ctx)
+	).WithParameters().
+		First(ctx)
+	fmt.Println(dataset.Edges.Parameters)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, model.DashboardFromEntParameters(parameters))
+	return c.JSON(http.StatusOK, model.DashboardFromEntDataset(dataset))
 }

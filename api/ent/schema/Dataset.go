@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
+type DataT map[string]float64
 type Dataset struct {
 	ent.Schema
 }
@@ -26,5 +27,6 @@ func (Dataset) Fields() []ent.Field {
 func (Dataset) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("parameters", Parameter.Type),
+		edge.To("datapoints", Datapoint.Type),
 	}
 }

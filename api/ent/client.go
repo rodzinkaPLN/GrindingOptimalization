@@ -253,15 +253,15 @@ func (c *DatapointClient) GetX(ctx context.Context, id uuid.UUID) *Datapoint {
 	return obj
 }
 
-// QueryParameters queries the parameters edge of a Datapoint.
-func (c *DatapointClient) QueryParameters(d *Datapoint) *ParameterQuery {
-	query := (&ParameterClient{config: c.config}).Query()
+// QueryDatasets queries the datasets edge of a Datapoint.
+func (c *DatapointClient) QueryDatasets(d *Datapoint) *DatasetQuery {
+	query := (&DatasetClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := d.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(datapoint.Table, datapoint.FieldID, id),
-			sqlgraph.To(parameter.Table, parameter.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, datapoint.ParametersTable, datapoint.ParametersColumn),
+			sqlgraph.To(dataset.Table, dataset.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, datapoint.DatasetsTable, datapoint.DatasetsColumn),
 		)
 		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
 		return fromV, nil
@@ -403,6 +403,22 @@ func (c *DatasetClient) QueryParameters(d *Dataset) *ParameterQuery {
 	return query
 }
 
+// QueryDatapoints queries the datapoints edge of a Dataset.
+func (c *DatasetClient) QueryDatapoints(d *Dataset) *DatapointQuery {
+	query := (&DatapointClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dataset.Table, dataset.FieldID, id),
+			sqlgraph.To(datapoint.Table, datapoint.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dataset.DatapointsTable, dataset.DatapointsColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DatasetClient) Hooks() []Hook {
 	return c.hooks.Dataset
@@ -530,22 +546,6 @@ func (c *ParameterClient) QueryDatasets(pa *Parameter) *DatasetQuery {
 			sqlgraph.From(parameter.Table, parameter.FieldID, id),
 			sqlgraph.To(dataset.Table, dataset.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, parameter.DatasetsTable, parameter.DatasetsColumn),
-		)
-		fromV = sqlgraph.Neighbors(pa.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryDatapoints queries the datapoints edge of a Parameter.
-func (c *ParameterClient) QueryDatapoints(pa *Parameter) *DatapointQuery {
-	query := (&DatapointClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pa.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(parameter.Table, parameter.FieldID, id),
-			sqlgraph.To(datapoint.Table, datapoint.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, parameter.DatapointsTable, parameter.DatapointsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pa.driver.Dialect(), step)
 		return fromV, nil

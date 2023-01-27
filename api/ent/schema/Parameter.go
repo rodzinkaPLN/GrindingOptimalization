@@ -32,6 +32,5 @@ func (Parameter) Edges() []ent.Edge {
 			Ref("parameters").
 			Field("dataset_id").
 			Unique(),
-		edge.To("datapoints", Datapoint.Type),
 	}
 }

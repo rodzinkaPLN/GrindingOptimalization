@@ -15,31 +15,31 @@ const (
 	FieldID = "id"
 	// FieldDataTime holds the string denoting the data_time field in the database.
 	FieldDataTime = "data_time"
-	// FieldParameterID holds the string denoting the parameter_id field in the database.
-	FieldParameterID = "parameter_id"
-	// FieldVal holds the string denoting the val field in the database.
-	FieldVal = "val"
+	// FieldDatasetID holds the string denoting the dataset_id field in the database.
+	FieldDatasetID = "dataset_id"
+	// FieldVals holds the string denoting the vals field in the database.
+	FieldVals = "vals"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
-	// EdgeParameters holds the string denoting the parameters edge name in mutations.
-	EdgeParameters = "parameters"
+	// EdgeDatasets holds the string denoting the datasets edge name in mutations.
+	EdgeDatasets = "datasets"
 	// Table holds the table name of the datapoint in the database.
 	Table = "datapoints"
-	// ParametersTable is the table that holds the parameters relation/edge.
-	ParametersTable = "datapoints"
-	// ParametersInverseTable is the table name for the Parameter entity.
-	// It exists in this package in order to avoid circular dependency with the "parameter" package.
-	ParametersInverseTable = "parameters"
-	// ParametersColumn is the table column denoting the parameters relation/edge.
-	ParametersColumn = "parameter_id"
+	// DatasetsTable is the table that holds the datasets relation/edge.
+	DatasetsTable = "datapoints"
+	// DatasetsInverseTable is the table name for the Dataset entity.
+	// It exists in this package in order to avoid circular dependency with the "dataset" package.
+	DatasetsInverseTable = "datasets"
+	// DatasetsColumn is the table column denoting the datasets relation/edge.
+	DatasetsColumn = "dataset_id"
 )
 
 // Columns holds all SQL columns for datapoint fields.
 var Columns = []string{
 	FieldID,
 	FieldDataTime,
-	FieldParameterID,
-	FieldVal,
+	FieldDatasetID,
+	FieldVals,
 	FieldCreatedAt,
 }
 
