@@ -1,4 +1,5 @@
-import * as React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import MultiSelectUnstyled from '@mui/base/MultiSelectUnstyled';
 import { selectUnstyledClasses } from '@mui/base/SelectUnstyled';
@@ -155,13 +156,21 @@ CustomMultiSelect.propTypes = {
 };
 
 export default function UnstyledSelectsMultiple(props) {
-  if (props?.parameters == undefined || props?.parameters.length == 0) {
+  const [once, setOnce] = useState(true)
+  const keys = props?.parameters?.map(p => p.key);
+  useEffect(() => {
+    if (props?.parameters != undefined && once) {
+      props.setPickedParams(keys);
+      setOnce(false);
+    }
+  }, [keys])
+  if (keys == undefined || keys.length == 0) {
     return <CircularProgress />
   }
 
   return (
     <CustomMultiSelect
-
+      defaultValue={keys}
       onChange={(e, v) => {
         props.setPickedParams(v)
       }}>

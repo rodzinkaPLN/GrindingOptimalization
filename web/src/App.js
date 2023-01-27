@@ -38,7 +38,10 @@ function App() {
         </Toolbar>
       </AppBar>
       <div className="App">
-        <Chart data={data} />
+        <Chart
+          data={data}
+          pickedParams={pickedParams}
+        />
       </div>
     </>
   );

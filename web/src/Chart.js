@@ -14,11 +14,13 @@ const Chart = (props) => {
         if (active && payload && payload.length) {
             return (
                 <div className="custom-tooltip">
-                    {Object.entries(payload[0].payload).map(([key, value]) => {
-                        return key == lastHovered ?
-                            <p className="label"><b>{`> ${key} : ${value}`}</b></p> :
-                            <p className="label">{`${key} : ${value}`}</p>
-                    })}
+                    {Object.entries(payload[0].payload).
+                        filter(v => props.pickedParams.includes(v.key)).
+                        map(([key, value]) => {
+                            return key == lastHovered ?
+                                <p className="label"><b>{`> ${key} : ${value}`}</b></p> :
+                                <p className="label">{`${key} : ${value}`}</p>
+                        })}
                 </div >
             );
         }
@@ -30,26 +32,30 @@ const Chart = (props) => {
     if (props?.data?.length == 0) {
         return <CircularProgress />
     }
+
+
     return (
         <div>
             {
-                props.data.parameters.map(param => (
-                    <LineChart
-                        width={width / 2}
-                        height={height / 4}
-                        data={props.data.data.filter(d => param.key in d)}
-                        syncId="anyId"
-                        onMouseEnter={() => {
-                            setLastHovered(param.key)
-                        }}
-                    >
-                        <XAxis dataKey="ts" name="Data" />
-                        <YAxis />
-                        <Line type="monotone" dataKey={param.key} stroke="#8884d8" activeDot={{ r: 2 }} />
-                        {lastHovered == param.key &&
-                            <Tooltip content={<CustomTooltip key={param.key} />} />}
-                    </LineChart>
-                ))
+                props.data.parameters.
+                    filter(v => props.pickedParams.includes(v.key)).
+                    map(param => (
+                        <LineChart
+                            width={width / 2}
+                            height={height / 4}
+                            data={props.data.data.filter(d => param.key in d)}
+                            syncId="anyId"
+                            onMouseEnter={() => {
+                                setLastHovered(param.key)
+                            }}
+                        >
+                            <XAxis dataKey="ts" name="Data" interval={props.data.data.length / 20} />
+                            <YAxis />
+                            <Line type="monotone" dataKey={param.key} stroke="#8884d8" />
+                            {lastHovered == param.key &&
+                                <Tooltip content={<CustomTooltip key={param.key} />} />}
+                        </LineChart>
+                    ))
             }
         </div>)
 }
