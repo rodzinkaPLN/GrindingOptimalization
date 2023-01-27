@@ -54,5 +54,5 @@ func (h *CrudHandler) GetDataPoints(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, model.ParametersFromEntParameters(parameters))
+	return c.JSON(http.StatusOK, model.DashboardFromEntParameters(parameters))
 }
