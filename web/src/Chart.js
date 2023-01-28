@@ -6,6 +6,10 @@ import {
     YAxis
 } from 'recharts';
 
+String.prototype.toProperCase = function () {
+    return this.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
+};
+
 const Chart = (props) => {
     const { innerWidth: width, innerHeight: height } = window;
     const [lastHovered, setLastHovered] = useState("")
@@ -21,8 +25,8 @@ const Chart = (props) => {
                             map(([key, value]) => {
                                 if (props.pickedParams.includes(key))
                                     return key == lastHovered ?
-                                        <p className="label"><b>{`> ${key}: ${value}`}</b></p> :
-                                        <p className="label">{`${key}: ${value}`}</p>
+                                        <p className="label"><b>{`> ${key.toProperCase()}: ${value}`}</b></p> :
+                                        <p className="label">{`${key.toProperCase()}: ${value}`}</p>
                             })
                     }
                 </div >
@@ -45,7 +49,7 @@ const Chart = (props) => {
                     filter(v => props.pickedParams.includes(v.key)).
                     map(param => (
                         <>
-                            <Typography >{param.key}</Typography>
+                            <Typography >{param.key.toProperCase()}</Typography>
                             <ResponsiveContainer width="100%" height={height / 4}>
                                 <LineChart
                                     data={props.data.data.filter(d => param.key in d)}
