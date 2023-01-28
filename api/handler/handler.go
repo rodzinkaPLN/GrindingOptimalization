@@ -116,6 +116,7 @@ func (h *CrudHandler) GetUsage(c echo.Context) error {
 	if err := c.Validate(req); err != nil {
 		return err
 	}
+	// TODO: replace with datamodel script usage
 
 	return c.JSON(http.StatusOK, responseGetUsage{
 		UsageData{
