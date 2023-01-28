@@ -2,6 +2,29 @@ import { Button, Card, CardActions, CardContent, CircularProgress, Slider, Typog
 import Stack from '@mui/material/Stack';
 import * as React from 'react';
 
+const SingleInput = (props) => {
+    const [val, setVal] = React.useState(props.input.defaultValue)
+    const v = props.input;
+    return <Card raised>
+        <CardContent>
+            <Typography textAlign='left'>{`Typ  : ${v.name}`}</Typography>
+        </CardContent>
+        <CardActions sx={{
+            justifyContent: 'center',
+        }}>
+            <Slider
+                defaultValue={v.default_value}
+                aria-label="Default"
+                valueLabelDisplay="auto"
+                step={v.step}
+                min={v.min}
+                max={v.max}
+            />
+        </CardActions>
+    </Card>
+}
+
+
 export default function UserInputs(props) {
     if (props.inputs == undefined) {
         return <CircularProgress />
@@ -9,27 +32,9 @@ export default function UserInputs(props) {
     return (
         <Stack spacing={2}>
             <Typography variant='h5'>Parametry</ Typography>
-            {Object.entries(props.inputs).
-                map(([key, value]) =>
-                    <Card raised>
-                        <CardContent>
-                            <Typography textAlign='left'>{`Typ  : ${key}`}</Typography>
-                        </CardContent>
-                        <CardActions sx={{
-                            justifyContent: 'center',
-                        }}>
-                            <Slider
-                                defaultValue={50}
-                                aria-label="Default"
-                                valueLabelDisplay="auto"
-
-                            />
-                        </CardActions>
-                    </Card>
-                )
-            }
+            {props.inputs.
+                map((v) => <SingleInput input={v} />)}
         </Stack >
     );
 }
-
 

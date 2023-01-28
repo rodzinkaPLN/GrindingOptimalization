@@ -25,7 +25,7 @@ type Userinput struct {
 	Max          float64 `json:"max"`
 	DefaultValue float64 `json:"default_value"`
 	Step         float64 `json:"step"`
-	Name         string
+	Name         string  `json:"name"`
 }
 type Userinputs struct {
 	Data []Userinput `json:"data"`

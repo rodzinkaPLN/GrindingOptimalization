@@ -30,6 +30,7 @@ function App() {
   const [fromDate, setFromDate] = useState(daysFromNow(-607))
   const [toDate, setToDate] = useState(daysFromNow(-606))
   const [recommendations, setRecommendations] = useState(undefined)
+  const [userInputs, setUserInputs] = useState(undefined);
 
   useEffect(() => {
     const dataFetch = async () => {
@@ -73,6 +74,19 @@ function App() {
     dataFetch();
   }, []);
 
+  useEffect(() => {
+    const dataFetch = async () => {
+      const newData = await (
+        await fetch(
+          `http://localhost:8080/api/v1/userinputs`
+        )
+      ).json();
+
+      setUserInputs(newData.data);
+    };
+
+    dataFetch();
+  }, []);
   return (
 
     <ThemeProvider theme={darkTheme}>
@@ -105,9 +119,7 @@ function App() {
               <Recommendations
                 recommendations={recommendations?.data} />
               <UserInputs
-                inputs={{
-                  xd: 2137
-                }}
+                inputs={userInputs}
               />
             </Paper>
 
