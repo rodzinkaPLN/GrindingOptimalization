@@ -10,6 +10,7 @@ import (
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/prediction"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/model"
 )
 
@@ -64,28 +65,16 @@ func (h *CrudHandler) GetDataPoints(c echo.Context) error {
 }
 
 func (h *CrudHandler) GetPredictions(c echo.Context) error {
-	// ctx := c.Request().Context()
+	ctx := c.Request().Context()
 
-	// preiction, err := h.db.Dataset.Query().Where(
-	// 	dataset.NameEQ(req.Dataset),
-	// ).WithDatapoints(
-	// 	func(q *ent.DatapointQuery) {
-	// 		q.Where(
-	// 			datapoint.And(
-	// 				datapoint.DataTimeGTE(req.From),
-	// 				datapoint.DataTimeLTE(req.To),
-	// 			),
-	// 		)
-	// 		q.Limit(1500)
-	// 		q.Order(ent.Asc(datapoint.FieldDataTime))
-	// 	},
-	// ).WithParameters().
-	// 	First(ctx)
-	// fmt.Println(dataset.Edges.Parameters)
-	// if err != nil {
-	// 	return err
-	// }
+	prediction, err := h.db.
+		Prediction.
+		Query().
+		Order(ent.Desc(prediction.FieldDataTime)).First(ctx)
+	if err != nil {
+		return err
+	}
 
-	// return c.JSON(http.StatusOK, model.DashboardFromEntDataset(dataset))
+	return c.JSON(http.StatusOK, model.PredictionFromEntPrediction(prediction))
 	return nil
 }

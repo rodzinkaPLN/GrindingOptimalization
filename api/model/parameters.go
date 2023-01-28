@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent"
 )
 
@@ -12,6 +14,10 @@ type Parameter struct {
 type Dashboard struct {
 	Parameters []Parameter              `json:"parameters"`
 	Data       []map[string]interface{} `json:"data"`
+}
+type Prediction struct {
+	Date time.Time      `json:"date"`
+	Data map[string]any `json:"data"`
 }
 
 func DashboardFromEntDataset(in *ent.Dataset) Dashboard {
@@ -33,6 +39,15 @@ func DashboardFromEntDataset(in *ent.Dataset) Dashboard {
 		for key, val := range v.Vals {
 			out.Data[i][key] = val
 		}
+	}
+	return out
+}
+
+func PredictionFromEntPrediction(in *ent.Prediction) Prediction {
+	var out Prediction
+	out.Data = make(map[string]any)
+	for k, v := range in.Vals {
+		out.Data[k] = v
 	}
 	return out
 }
