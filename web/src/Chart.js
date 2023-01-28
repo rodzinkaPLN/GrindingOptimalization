@@ -50,7 +50,7 @@ const Chart = (props) => {
                     filter(v => props.pickedParams.includes(v.key)).
                     map(param => (
                         <>
-                            <Typography >{param.key.toProperCase()}</Typography>
+                            <Typography variant='h6' >{param.key.toProperCase()}</Typography>
                             <ResponsiveContainer width="100%" height={height / 4}>
                                 <LineChart
                                     data={props.data.data.filter(d => param.key in d)}

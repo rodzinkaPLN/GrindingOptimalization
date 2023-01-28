@@ -62,9 +62,9 @@ function App() {
       </AppBar >
       <div className="App" >
 
-        <Grid container spacing={2} columns={16} paddingTop="5em">
+        <Grid container spacing={6} columns={16} paddingTop="5em" paddingLeft="3em">
           <Grid item xs={10}>
-            <Paper sx={{ width: '100%' }}>
+            <Paper className="componentWrapper">
               <Chart
                 data={data}
                 pickedParams={pickedParams}
@@ -72,11 +72,14 @@ function App() {
             </Paper>
           </Grid>
           <Grid item xs={4}>
-            <Recommendations
-              predictions={{
-                xd: 2137,
-                dd: 2333,
-              }} />
+            <Paper className="componentWrapper">
+
+              <Recommendations
+                predictions={{
+                  xd: 2137,
+                  dd: 2333,
+                }} />
+            </Paper>
           </Grid>
         </Grid>
       </div>
