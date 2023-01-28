@@ -142,7 +142,24 @@ const SingleInput = (props) => {
     </Card>
 }
 
+const DataStat = (props) => {
+    console.log("data", props.name[0])
+    return <Card raised>
+        <Typography variant="h6" > {props.name[0] == 'energy' ? "Energia" : "Granlacja"}</Typography>
+        <Button> {props.name[1]}</Button>
+    </Card>
+}
 
+const Statz = (props) => {
+    if (props.usage == undefined) {
+        return <CircularProgress />
+    }
+    console.log("statz", props.usage)
+
+    return <Stack spacing={2}>
+        {Object.entries(props.usage).map((k, v) => <DataStat name={k} val={v} />)}
+    </Stack>
+}
 export default function UserInputs(props) {
     const [data, setData] = React.useState({
         cu: 800,
@@ -160,7 +177,7 @@ export default function UserInputs(props) {
             ).json();
 
             setUsage(newData.data);
-            console.log(newData)
+            console.log(newData.data)
         };
 
         dataFetch();
@@ -169,16 +186,18 @@ export default function UserInputs(props) {
         return <CircularProgress />
     }
     return (
-        <Grid container columns={16}>
+        <Grid container columns={16} spacing={2}>
+            <Grid item xs={16}>
+                <Typography variant='h5'>Parametry</ Typography> <SwitchXD />
+            </Grid>
             <Grid item xs={12}>
                 <Stack spacing={2}>
-                    <Typography variant='h5'>Parametry</ Typography> <SwitchXD />
                     {props.inputs.
                         map((v) => <SingleInput input={v} setter={setData} />)}
                 </Stack >
             </Grid>
             <Grid item xs={4}>
-                XD
+                <Statz usage={usage} />
             </Grid>
         </Grid>
     );
