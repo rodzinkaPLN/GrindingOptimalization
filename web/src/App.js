@@ -25,7 +25,6 @@ function daysFromNow(days) {
 function App() {
   const [data, setData] = useState([]);
   const [predictedData, setPredictedData] = useState([])
-  const [pickedParams, setPickedParams] = useState([])
   const [fromDate, setFromDate] = useState(daysFromNow(-607))
   const [toDate, setToDate] = useState(daysFromNow(-606))
 
@@ -69,11 +68,6 @@ function App() {
           </Typography>
           <DTPicker date={fromDate} setDate={setFromDate} label="od" />
           <DTPicker date={toDate} setDate={setToDate} label="do" />
-          <UnstyledSelectsMultiple
-            parameters={data?.parameters}
-            pickedParams={pickedParams}
-            setPickedParams={setPickedParams}
-          />
         </Toolbar >
       </AppBar >
       <div className="App" >
@@ -85,7 +79,6 @@ function App() {
                 id="xd2"
                 title="Dane procesowe"
                 data={data}
-                pickedParams={pickedParams}
               />
             </Paper>
           </Grid>
@@ -105,7 +98,6 @@ function App() {
                 id="xd2"
                 title="Dane spredykowane"
                 data={predictedData}
-                pickedParams={pickedParams}
               />
             </Paper>
           </Grid>

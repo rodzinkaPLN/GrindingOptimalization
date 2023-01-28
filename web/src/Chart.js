@@ -5,6 +5,7 @@ import {
     Line, LineChart, ResponsiveContainer, Tooltip, XAxis,
     YAxis
 } from 'recharts';
+import UnstyledSelectsMultiple from "./StyledMultipicker";
 
 String.prototype.toProperCase = function () {
     return this.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
@@ -13,6 +14,7 @@ String.prototype.toProperCase = function () {
 const Chart = (props) => {
     const { innerWidth: width, innerHeight: height } = window;
     const [lastHovered, setLastHovered] = useState("")
+    const [pickedParams, setPickedParams] = useState([])
 
     const CustomTooltip = ({ active, payload, _, keyX }) => {
         if (active && payload && payload.length && lastHovered == keyX) {
@@ -23,7 +25,7 @@ const Chart = (props) => {
                     {
                         Object.entries(payload[0].payload).
                             map(([key, value]) => {
-                                if (props.pickedParams.includes(key))
+                                if (pickedParams.includes(key))
                                     return key == lastHovered ?
                                         <p className="label"><b>{`> ${key.toProperCase()}: ${value}`}</b></p> :
                                         <p className="label">{`${key.toProperCase()}: ${value}`}</p>
@@ -44,10 +46,16 @@ const Chart = (props) => {
 
     return (
         <>
-            <Typography variant='h5'>{props.title}</Typography>
+            <Typography variant='h5'>{props.title}
+            </Typography>
+            <UnstyledSelectsMultiple
+                parameters={props.data?.parameters}
+                pickedParams={pickedParams}
+                setPickedParams={setPickedParams}
+            />
             {
                 props.data.parameters.
-                    filter(v => props.pickedParams.includes(v.key)).
+                    filter(v => pickedParams.includes(v.key)).
                     map(param => (
                         <>
                             <Typography variant='h6' >{param.key.toProperCase()}</Typography>
