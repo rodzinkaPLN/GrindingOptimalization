@@ -1,4 +1,4 @@
-import { Button, Card, CardActions, CardContent, CircularProgress, FormControlLabel, Slider, Switch, TextField, Typography } from '@mui/material';
+import { Button, Card, CardActions, CardContent, CircularProgress, FormControlLabel, Grid, Slider, Switch, TextField, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
@@ -77,6 +77,25 @@ const SwitchXD = () => {
 const SingleInput = (props) => {
     const [val, setVal] = React.useState(props.input.default_value)
     const v = props.input;
+    React.useEffect(() => {
+        console.log(v.name)
+        if (v.name == 'woda') {
+            props.setter(v => ({
+                ...v,
+                ['water']: val,
+            }))
+        } else if (v.name == 'ruda') {
+            props.setter(v => ({
+                ...v,
+                ['cu']: val,
+            }))
+        } else {
+            props.setter(v => ({
+                ...v,
+                ['speed']: val,
+            }))
+        }
+    }, [val])
     return <Card raised sx={{ padding: '1em' }}>
         <CardContent>
             <Stack spacing={2} direction='row'>
@@ -125,15 +144,43 @@ const SingleInput = (props) => {
 
 
 export default function UserInputs(props) {
+    const [data, setData] = React.useState({
+        cu: 800,
+        speed: 900,
+        water: 30,
+    })
+
+    const [usage, setUsage] = React.useState(undefined);
+    React.useEffect(() => {
+        const dataFetch = async () => {
+            const newData = await (
+                await fetch(
+                    `http://localhost:8080/api/v1/data/usage?cu=${data.cu}&speed=${data.speed}&water=${data.water}`
+                )
+            ).json();
+
+            setUsage(newData.data);
+            console.log(newData)
+        };
+
+        dataFetch();
+    }, [data])
     if (props.inputs == undefined) {
         return <CircularProgress />
     }
     return (
-        <Stack spacing={2}>
-            <Typography variant='h5'>Parametry</ Typography> <SwitchXD />
-            {props.inputs.
-                map((v) => <SingleInput input={v} />)}
-        </Stack >
+        <Grid container columns={16}>
+            <Grid item xs={12}>
+                <Stack spacing={2}>
+                    <Typography variant='h5'>Parametry</ Typography> <SwitchXD />
+                    {props.inputs.
+                        map((v) => <SingleInput input={v} setter={setData} />)}
+                </Stack >
+            </Grid>
+            <Grid item xs={4}>
+                XD
+            </Grid>
+        </Grid>
     );
 }
 
