@@ -104,6 +104,7 @@ const SingleInput = (props) => {
                     id=""
                     label={v.name}
                     type="number"
+                    disabled={props.disabled}
                     onChange={(e) => {
                         setVal(parseFloat(e.target.value));
                     }}
@@ -119,6 +120,7 @@ const SingleInput = (props) => {
                 <Button
                     onClick={() => { alert("TODO: dodać obsługe sterownika") }}
                     variant='outlined'
+                    disabled={props.disabled}
                 >
                     APLIKUJ
                 </Button>
@@ -133,6 +135,7 @@ const SingleInput = (props) => {
                 onChange={(_, vx) => {
                     setVal(vx);
                 }}
+                disabled={props.disabled}
                 valueLabelDisplay="auto"
                 step={v.step}
                 min={v.min}
@@ -142,22 +145,21 @@ const SingleInput = (props) => {
     </Card>
 }
 
-const DataStat = (props) => {
-    console.log("data", props.name[0])
-    return <Card raised>
-        <Typography variant="h6" > {props.name[0] == 'energy' ? "Energia" : "Granlacja"}</Typography>
-        <Button> {props.name[1]}</Button>
-    </Card>
-}
 
 const Statz = (props) => {
     if (props.usage == undefined) {
         return <CircularProgress />
     }
-    console.log("statz", props.usage)
 
     return <Stack spacing={2}>
-        {Object.entries(props.usage).map((k, v) => <DataStat name={k} val={v} />)}
+        <Card raised>
+            <Typography variant="h6" > Energia </Typography>
+            <Button> {props.usage.energy}</Button>
+        </Card>
+        <Card raised>
+            <Typography variant="h6" > Granulacja</Typography>
+            <Button> {props.usage.granulate}</Button>
+        </Card>
     </Stack>
 }
 export default function UserInputs(props) {
@@ -170,6 +172,7 @@ export default function UserInputs(props) {
     const [usage, setUsage] = React.useState(undefined);
     React.useEffect(() => {
         const dataFetch = async () => {
+            setUsage(undefined)
             const newData = await (
                 await fetch(
                     `http://localhost:8080/api/v1/data/usage?cu=${data.cu}&speed=${data.speed}&water=${data.water}`
@@ -179,7 +182,6 @@ export default function UserInputs(props) {
             setUsage(newData.data);
             console.log(newData.data)
         };
-
         dataFetch();
     }, [data])
     if (props.inputs == undefined) {
@@ -193,7 +195,7 @@ export default function UserInputs(props) {
             <Grid item xs={12}>
                 <Stack spacing={2}>
                     {props.inputs.
-                        map((v) => <SingleInput input={v} setter={setData} />)}
+                        map((v) => <SingleInput input={v} setter={setData} disabled={usage == undefined} />)}
                 </Stack >
             </Grid>
             <Grid item xs={4}>

@@ -118,6 +118,7 @@ func (h *CrudHandler) GetUsage(c echo.Context) error {
 	}
 	// TODO: replace with datamodel script usage
 
+	time.Sleep(2 * time.Second)
 	return c.JSON(http.StatusOK, responseGetUsage{
 		UsageData{
 			Energy: 1000 + req.Cu*0.02 +
