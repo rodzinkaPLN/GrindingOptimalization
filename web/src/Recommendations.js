@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
-import { Button, Card, CardActions, CardContent, FormControlLabel, Switch, Typography } from '@mui/material';
+import { Button, Card, CardActions, CardContent, CircularProgress, FormControlLabel, Switch, Typography } from '@mui/material';
 import { alignProperty } from '@mui/material/styles/cssUtils';
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -76,10 +76,13 @@ const SwitchXD = () => {
 }
 
 export default function Recommendations(props) {
+    if (props.recommendations == undefined) {
+        return <CircularProgress />
+    }
     return (
         <Stack spacing={2}>
             <Typography variant='h5'>Rekomendacje</ Typography> <SwitchXD />
-            {Object.entries(props.predictions).
+            {Object.entries(props.recommendations).
                 map(([key, value]) =>
                     <Card raised>
                         <CardContent>
@@ -93,7 +96,6 @@ export default function Recommendations(props) {
                                 onClick={() => { alert("TODO: dodać obsługe sterownika") }}
                                 variant='outlined'
                             >
-
                                 APLIKUJ
                             </Button>
                         </CardActions>

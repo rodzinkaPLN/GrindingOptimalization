@@ -27,6 +27,7 @@ function App() {
   const [predictedData, setPredictedData] = useState([])
   const [fromDate, setFromDate] = useState(daysFromNow(-607))
   const [toDate, setToDate] = useState(daysFromNow(-606))
+  const [recommendations, setRecommendations] = useState(undefined)
 
   useEffect(() => {
     const dataFetch = async () => {
@@ -55,6 +56,20 @@ function App() {
 
     dataFetch();
   }, [fromDate, toDate]);
+
+  useEffect(() => {
+    const dataFetch = async () => {
+      const newData = await (
+        await fetch(
+          `http://localhost:8080/api/v1/data/predictions`
+        )
+      ).json();
+
+      setRecommendations(newData);
+    };
+
+    dataFetch();
+  }, []);
 
   return (
 
@@ -86,14 +101,10 @@ function App() {
             <Paper className="componentWrapper">
 
               <Recommendations
-                predictions={{
-                  xd: 2137,
-                  dd: 2333,
-                }} />
+                recommendations={recommendations?.data} />
             </Paper>
 
             <Paper className="componentWrapper">
-
               <Chart
                 id="xd2"
                 title="Dane spredykowane"
