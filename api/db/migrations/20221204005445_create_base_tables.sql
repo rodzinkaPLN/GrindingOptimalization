@@ -31,6 +31,15 @@ CREATE TABLE predictions (
     created_at timestamptz
 );
 
+CREATE TABLE userinputs (
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    min double precision,
+    max double precision,
+    step double precision,
+    defaultval double precision,
+    name varchar
+);
+
 -- +goose StatementEnd
 -- +goose Down
 -- +goose StatementBegin

@@ -9,6 +9,8 @@ import Chart from './Chart';
 import DTPicker from './DatePicker';
 import { createTheme, Grid, Paper, ThemeProvider } from '@mui/material';
 import Recommendations from './Recommendations';
+import UserPara from './UserInputs';
+import UserInputs from './UserInputs';
 
 const darkTheme = createTheme({
   palette: {
@@ -102,6 +104,11 @@ function App() {
 
               <Recommendations
                 recommendations={recommendations?.data} />
+              <UserInputs
+                inputs={{
+                  xd: 2137
+                }}
+              />
             </Paper>
 
             <Paper className="componentWrapper">
