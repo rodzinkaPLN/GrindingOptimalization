@@ -53,7 +53,7 @@ function App() {
       <div className="App">
 
         <Grid container spacing={2} columns={16}>
-          <Grid item xs={12}>
+          <Grid item xs={10}>
             <Chart
               data={data}
               pickedParams={pickedParams}
