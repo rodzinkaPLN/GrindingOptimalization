@@ -24,23 +24,39 @@ function daysFromNow(days) {
 
 function App() {
   const [data, setData] = useState([]);
+  const [predictedData, setPredictedData] = useState([])
   const [pickedParams, setPickedParams] = useState([])
   const [fromDate, setFromDate] = useState(daysFromNow(-607))
   const [toDate, setToDate] = useState(daysFromNow(-606))
 
   useEffect(() => {
     const dataFetch = async () => {
-      const data = await (
+      const newData = await (
         await fetch(
           `http://localhost:8080/api/v1/data?dataset=probne&from=${fromDate.toISOString()}&to=${toDate.toISOString()}`
         )
       ).json();
 
-      setData(data);
+      setData(newData);
     };
 
     dataFetch();
   }, [fromDate, toDate]);
+
+  useEffect(() => {
+    const dataFetch = async () => {
+      const newData = await (
+        await fetch(
+          `http://localhost:8080/api/v1/data?dataset=predykaty&from=${fromDate.toISOString()}&to=${toDate.toISOString()}`
+        )
+      ).json();
+
+      setPredictedData(newData);
+    };
+
+    dataFetch();
+  }, [fromDate, toDate]);
+
   return (
 
     <ThemeProvider theme={darkTheme}>
@@ -66,6 +82,7 @@ function App() {
           <Grid item xs={8} >
             <Paper className="componentWrapper">
               <Chart
+                id="xd2"
                 title="Dane procesowe"
                 data={data}
                 pickedParams={pickedParams}
@@ -85,8 +102,9 @@ function App() {
             <Paper className="componentWrapper">
 
               <Chart
+                id="xd2"
                 title="Dane spredykowane"
-                data={data}
+                data={predictedData}
                 pickedParams={pickedParams}
               />
             </Paper>

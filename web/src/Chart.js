@@ -14,8 +14,8 @@ const Chart = (props) => {
     const { innerWidth: width, innerHeight: height } = window;
     const [lastHovered, setLastHovered] = useState("")
 
-    const CustomTooltip = ({ active, payload, _ }) => {
-        if (active && payload && payload.length) {
+    const CustomTooltip = ({ active, payload, _, keyX }) => {
+        if (active && payload && payload.length && lastHovered == keyX) {
             const date = new Date(payload[0].payload.Data)
             return (
                 < div className="custom-tooltip" >
@@ -54,7 +54,7 @@ const Chart = (props) => {
                             <ResponsiveContainer width="100%" height={height / 4}>
                                 <LineChart
                                     data={props.data.data.filter(d => param.key in d)}
-                                    syncId="anyId"
+                                    syncId={props.id}
                                     onMouseEnter={() => {
                                         setLastHovered(param.key)
                                     }}
@@ -66,8 +66,7 @@ const Chart = (props) => {
                                     />
                                     <YAxis />
                                     <Line type="monotone" dataKey={param.key} stroke="#8884d8" />
-                                    {lastHovered == param.key &&
-                                        <Tooltip content={<CustomTooltip key={param.key} />} />}
+                                    <Tooltip content={<CustomTooltip keyX={param.key} />} />
                                 </LineChart>
                             </ResponsiveContainer>
                         </>
