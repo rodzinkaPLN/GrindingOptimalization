@@ -2,14 +2,12 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
-import UnstyledSelectsMultiple from './StyledMultipicker';
 
+import { createTheme, Grid, Paper, ThemeProvider } from '@mui/material';
 import './App.css';
 import Chart from './Chart';
 import DTPicker from './DatePicker';
-import { createTheme, Grid, Paper, ThemeProvider } from '@mui/material';
 import Recommendations from './Recommendations';
-import UserPara from './UserInputs';
 import UserInputs from './UserInputs';
 
 const darkTheme = createTheme({
@@ -29,7 +27,6 @@ function App() {
   const [predictedData, setPredictedData] = useState([])
   const [fromDate, setFromDate] = useState(daysFromNow(-607))
   const [toDate, setToDate] = useState(daysFromNow(-606))
-  const [recommendations, setRecommendations] = useState(undefined)
   const [userInputs, setUserInputs] = useState(undefined);
 
   useEffect(() => {
@@ -59,21 +56,6 @@ function App() {
 
     dataFetch();
   }, [fromDate, toDate]);
-
-  useEffect(() => {
-    const dataFetch = async () => {
-      const newData = await (
-        await fetch(
-          `http://localhost:8080/api/v1/data/predictions`
-        )
-      ).json();
-
-      setRecommendations(newData);
-    };
-
-    dataFetch();
-  }, []);
-
   useEffect(() => {
     const dataFetch = async () => {
       const newData = await (
@@ -115,9 +97,6 @@ function App() {
           </Grid>
           <Grid item xs={7}>
             <Paper className="componentWrapper">
-
-              <Recommendations
-                recommendations={recommendations?.data} />
               <UserInputs
                 inputs={userInputs}
               />
