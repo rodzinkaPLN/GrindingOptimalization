@@ -76,5 +76,4 @@ func (h *CrudHandler) GetPredictions(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, model.PredictionFromEntPrediction(prediction))
-	return nil
 }
