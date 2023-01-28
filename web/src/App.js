@@ -35,7 +35,7 @@ function App() {
   }, [fromDate, toDate]);
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="fixed">
         <Toolbar sx={{ padding: "1em" }} className="AppToolbar">
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Admin panel
