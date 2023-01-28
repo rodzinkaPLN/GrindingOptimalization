@@ -5,7 +5,7 @@ import * as React from 'react';
 const SingleInput = (props) => {
     const [val, setVal] = React.useState(props.input.default_value)
     const v = props.input;
-    return <Card raised>
+    return <Card raised sx={{ padding: '1em' }}>
         <CardContent>
             <TextField
                 fullWidth
@@ -16,6 +16,13 @@ const SingleInput = (props) => {
                     setVal(parseFloat(e.target.value));
                 }}
                 value={val}
+                onBlur={() => {
+                    if (val > v.max) {
+                        setVal(v.max)
+                    } else if (val < v.min) {
+                        setVal(v.min);
+                    }
+                }}
             />
         </CardContent>
         <CardActions sx={{
@@ -27,7 +34,7 @@ const SingleInput = (props) => {
                 onChange={(_, vx) => {
                     setVal(vx);
                 }}
-                valueLabelDisplay="on"
+                valueLabelDisplay="auto"
                 step={v.step}
                 min={v.min}
                 max={v.max}
