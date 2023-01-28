@@ -63,15 +63,16 @@ function App() {
       <div className="App" >
 
         <Grid container spacing={6} columns={16} paddingTop="5em" paddingLeft="3em">
-          <Grid item xs={10}>
+          <Grid item xs={8} >
             <Paper className="componentWrapper">
               <Chart
+                title="Dane procesowe"
                 data={data}
                 pickedParams={pickedParams}
               />
             </Paper>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={7}>
             <Paper className="componentWrapper">
 
               <Recommendations
@@ -79,6 +80,15 @@ function App() {
                   xd: 2137,
                   dd: 2333,
                 }} />
+            </Paper>
+
+            <Paper className="componentWrapper">
+
+              <Chart
+                title="Dane spredykowane"
+                data={data}
+                pickedParams={pickedParams}
+              />
             </Paper>
           </Grid>
         </Grid>

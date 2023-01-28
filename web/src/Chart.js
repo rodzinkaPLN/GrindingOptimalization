@@ -14,7 +14,7 @@ const Chart = (props) => {
     const { innerWidth: width, innerHeight: height } = window;
     const [lastHovered, setLastHovered] = useState("")
 
-    const CustomTooltip = ({ active, payload, label }) => {
+    const CustomTooltip = ({ active, payload, _ }) => {
         if (active && payload && payload.length) {
             const date = new Date(payload[0].payload.Data)
             return (
@@ -44,7 +44,7 @@ const Chart = (props) => {
 
     return (
         <>
-            <Typography variant='h5'>Dane procesowe</Typography>
+            <Typography variant='h5'>{props.title}</Typography>
             {
                 props.data.parameters.
                     filter(v => props.pickedParams.includes(v.key)).
