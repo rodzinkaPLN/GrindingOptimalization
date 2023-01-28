@@ -40,6 +40,13 @@ CREATE TABLE userinputs (
     name varchar
 );
 
+INSERT INTO
+    userinputs(min, max, step, defaultval, name)
+VALUES
+    (600, 1000, 5, 800, 'ruda'),
+    (30, 100, 1, 30, 'woda'),
+    (800, 1200, 20, 900, 'obroty');
+
 -- +goose StatementEnd
 -- +goose Down
 -- +goose StatementBegin
