@@ -55,7 +55,11 @@ const Chart = (props) => {
                                     setLastHovered(param.key)
                                 }}
                             >
-                                <XAxis dataKey="ts" name="Data" interval={props.data.data.length / 20} />
+                                <XAxis
+                                    dataKey="ts"
+                                    name="Data"
+                                    interval={props.data.data.length / 20}
+                                />
                                 <YAxis />
                                 <Line type="monotone" dataKey={param.key} stroke="#8884d8" />
                                 {lastHovered == param.key &&
