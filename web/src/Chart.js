@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Card, CardContent, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import React, { useState } from 'react';
 import {
@@ -57,27 +57,28 @@ const Chart = (props) => {
                 props.data.parameters.
                     filter(v => pickedParams.includes(v.key)).
                     map(param => (
-                        <>
-                            <Typography variant='h6' >{param.key.toProperCase()}</Typography>
-                            <ResponsiveContainer width="100%" height={height / 4}>
-                                <LineChart
-                                    data={props.data.data.filter(d => param.key in d)}
-                                    syncId={props.id}
-                                    onMouseEnter={() => {
-                                        setLastHovered(param.key)
-                                    }}
-                                >
-                                    <XAxis
-                                        dataKey="ts"
-                                        name="Data"
-                                        interval={props.data.data.length / 20}
-                                    />
-                                    <YAxis />
-                                    <Line type="monotone" dataKey={param.key} stroke="#8884d8" />
-                                    <Tooltip content={<CustomTooltip keyX={param.key} />} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </>
+                        <Card raised sx={{ marginBottom: "2em" }}>
+                            <CardContent>
+                                <Typography variant='h6' >{param.key.toProperCase()}</Typography>
+                                <ResponsiveContainer width="100%" height={height / 4}>
+                                    <LineChart
+                                        data={props.data.data.filter(d => param.key in d)}
+                                        syncId={props.id}
+                                        onMouseEnter={() => {
+                                            setLastHovered(param.key)
+                                        }}
+                                    >
+                                        <XAxis
+                                            dataKey="ts"
+                                            name="Data"
+                                            interval={props.data.data.length / 20}
+                                        />
+                                        <YAxis />
+                                        <Line type="monotone" dataKey={param.key} stroke="#8884d8" />
+                                        <Tooltip content={<CustomTooltip keyX={param.key} />} />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </CardContent></Card>
                     ))
             }
         </>)

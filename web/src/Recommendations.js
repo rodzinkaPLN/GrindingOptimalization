@@ -81,7 +81,7 @@ export default function Recommendations(props) {
             <Typography variant='h5'>Rekomendacje</ Typography> <SwitchXD />
             {Object.entries(props.predictions).
                 map(([key, value]) =>
-                    <Card>
+                    <Card raised>
                         <CardContent>
                             <Typography textAlign='left'>{`Typ  : ${key}`}</Typography>
                             <Typography textAlign='left'>{`Wartość: ${value}`}</Typography>
