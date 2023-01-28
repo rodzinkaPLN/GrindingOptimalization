@@ -94,9 +94,9 @@ func (h *CrudHandler) GetUserinputs(c echo.Context) error {
 }
 
 type requestGetUsage struct {
-	Water float64 `query:"woda"`
-	Cu    float64 `query:"ruda"`
-	Speed float64 `query:"obroty"`
+	Water float64 `query:"water"`
+	Cu    float64 `query:"cu"`
+	Speed float64 `query:"speed"`
 }
 
 type UsageData struct {
