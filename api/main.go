@@ -80,6 +80,7 @@ func main() {
 	data.POST(":csv-upload", crudHandler.DataCSVUpload)
 	data.GET("", crudHandler.GetDataPoints)
 	data.GET("/predictions", crudHandler.GetPredictions)
+	data.GET("/usage", crudHandler.GetUsage)
 
 	api.GET("/userinputs", crudHandler.GetUserinputs)
 	log.Fatal(e.Start(cfg.Server.Address()))

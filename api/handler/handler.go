@@ -92,3 +92,39 @@ func (h *CrudHandler) GetUserinputs(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, model.UserinputFromEntUserinput(userinputs))
 }
+
+type requestGetUsage struct {
+	Water float64 `query:"woda"`
+	Cu    float64 `query:"ruda"`
+	Speed float64 `query:"obroty"`
+}
+
+type UsageData struct {
+	Energy    float64 `json:"energy"`
+	Granulate float64 `json:"granulate"`
+}
+type responseGetUsage struct {
+	Data UsageData `json:"data"`
+}
+
+func (h *CrudHandler) GetUsage(c echo.Context) error {
+	var req requestGetUsage
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	if err := c.Validate(req); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, responseGetUsage{
+		UsageData{
+			Energy: 1000 + req.Cu*0.02 +
+				req.Speed*1.05 +
+				req.Water*0.3,
+			Granulate: 200 + req.Cu*0.72 +
+				req.Speed*1.75 +
+				req.Water*0.02,
+		},
+	})
+}
