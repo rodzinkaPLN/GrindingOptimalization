@@ -12,13 +12,15 @@ const Item = styled(Paper)(({ theme }) => ({
     color: theme.palette.text.secondary,
 }));
 
-export default function Recommendations() {
+export default function Recommendations(props) {
     return (
         <Box sx={{ width: '100%' }}>
             <Stack spacing={2}>
-                <Item>Item 1</Item>
-                <Item>Item 2</Item>
-                <Item>Item 3</Item>
+                {Object.entries(props.predictions).
+                    map(([key, value]) => {
+                        <p className="label"><b>{`> ${key}: ${value}`}</b></p>
+                    })
+                }
             </Stack>
         </Box>
     );

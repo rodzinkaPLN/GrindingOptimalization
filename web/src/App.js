@@ -61,7 +61,11 @@ function App() {
             />
           </Grid>
           <Grid item xs={4}>
-            <Recommendations />
+            <Recommendations
+              predictions={{
+                xd: 2137,
+                dd: 2333,
+              }} />
           </Grid>
         </Grid>
 
