@@ -7,8 +7,14 @@ import UnstyledSelectsMultiple from './StyledMultipicker';
 import './App.css';
 import Chart from './Chart';
 import DTPicker from './DatePicker';
-import { Grid } from '@mui/material';
+import { createTheme, Grid, Paper, ThemeProvider } from '@mui/material';
 import Recommendations from './Recommendations';
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
 
 function daysFromNow(days) {
   const copy = new Date()
@@ -36,9 +42,12 @@ function App() {
     dataFetch();
   }, [fromDate, toDate]);
   return (
-    <>
+
+    <ThemeProvider theme={darkTheme}>
+
       <AppBar position="fixed">
-        <Toolbar sx={{ padding: "1em" }} className="AppToolbar">
+        < Toolbar sx={{ padding: "1em" }
+        } className="AppToolbar" >
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Admin panel
           </Typography>
@@ -49,16 +58,18 @@ function App() {
             pickedParams={pickedParams}
             setPickedParams={setPickedParams}
           />
-        </Toolbar>
-      </AppBar>
+        </Toolbar >
+      </AppBar >
       <div className="App" >
 
         <Grid container spacing={2} columns={16} paddingTop="5em">
           <Grid item xs={10}>
-            <Chart
-              data={data}
-              pickedParams={pickedParams}
-            />
+            <Paper sx={{ width: '100%' }}>
+              <Chart
+                data={data}
+                pickedParams={pickedParams}
+              />
+            </Paper>
           </Grid>
           <Grid item xs={4}>
             <Recommendations
@@ -68,9 +79,8 @@ function App() {
               }} />
           </Grid>
         </Grid>
-
       </div>
-    </>
+    </ThemeProvider >
   );
 }
 

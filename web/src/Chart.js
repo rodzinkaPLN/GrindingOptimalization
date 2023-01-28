@@ -44,6 +44,7 @@ const Chart = (props) => {
 
     return (
         <>
+            <Typography variant='h5'>Dane procesowe</Typography>
             {
                 props.data.parameters.
                     filter(v => props.pickedParams.includes(v.key)).
