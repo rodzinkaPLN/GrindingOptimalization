@@ -64,11 +64,25 @@ var (
 			},
 		},
 	}
+	// PredictionsColumns holds the columns for the "predictions" table.
+	PredictionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "data_time", Type: field.TypeTime},
+		{Name: "vals", Type: field.TypeJSON},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// PredictionsTable holds the schema information for the "predictions" table.
+	PredictionsTable = &schema.Table{
+		Name:       "predictions",
+		Columns:    PredictionsColumns,
+		PrimaryKey: []*schema.Column{PredictionsColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		DatapointsTable,
 		DatasetsTable,
 		ParametersTable,
+		PredictionsTable,
 	}
 )
 

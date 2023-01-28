@@ -14,6 +14,7 @@ import (
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/prediction"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -41,9 +42,10 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		datapoint.Table: datapoint.ValidColumn,
-		dataset.Table:   dataset.ValidColumn,
-		parameter.Table: parameter.ValidColumn,
+		datapoint.Table:  datapoint.ValidColumn,
+		dataset.Table:    dataset.ValidColumn,
+		parameter.Table:  parameter.ValidColumn,
+		prediction.Table: prediction.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

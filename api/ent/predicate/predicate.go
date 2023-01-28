@@ -14,3 +14,6 @@ type Dataset func(*sql.Selector)
 
 // Parameter is the predicate function for parameter builders.
 type Parameter func(*sql.Selector)
+
+// Prediction is the predicate function for prediction builders.
+type Prediction func(*sql.Selector)

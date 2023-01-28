@@ -14,6 +14,7 @@ import (
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/prediction"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -31,6 +32,8 @@ type Client struct {
 	Dataset *DatasetClient
 	// Parameter is the client for interacting with the Parameter builders.
 	Parameter *ParameterClient
+	// Prediction is the client for interacting with the Prediction builders.
+	Prediction *PredictionClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -47,6 +50,7 @@ func (c *Client) init() {
 	c.Datapoint = NewDatapointClient(c.config)
 	c.Dataset = NewDatasetClient(c.config)
 	c.Parameter = NewParameterClient(c.config)
+	c.Prediction = NewPredictionClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -78,11 +82,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		Datapoint: NewDatapointClient(cfg),
-		Dataset:   NewDatasetClient(cfg),
-		Parameter: NewParameterClient(cfg),
+		ctx:        ctx,
+		config:     cfg,
+		Datapoint:  NewDatapointClient(cfg),
+		Dataset:    NewDatasetClient(cfg),
+		Parameter:  NewParameterClient(cfg),
+		Prediction: NewPredictionClient(cfg),
 	}, nil
 }
 
@@ -100,11 +105,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		Datapoint: NewDatapointClient(cfg),
-		Dataset:   NewDatasetClient(cfg),
-		Parameter: NewParameterClient(cfg),
+		ctx:        ctx,
+		config:     cfg,
+		Datapoint:  NewDatapointClient(cfg),
+		Dataset:    NewDatasetClient(cfg),
+		Parameter:  NewParameterClient(cfg),
+		Prediction: NewPredictionClient(cfg),
 	}, nil
 }
 
@@ -136,6 +142,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Datapoint.Use(hooks...)
 	c.Dataset.Use(hooks...)
 	c.Parameter.Use(hooks...)
+	c.Prediction.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
@@ -144,6 +151,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Datapoint.Intercept(interceptors...)
 	c.Dataset.Intercept(interceptors...)
 	c.Parameter.Intercept(interceptors...)
+	c.Prediction.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -155,6 +163,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Dataset.mutate(ctx, m)
 	case *ParameterMutation:
 		return c.Parameter.mutate(ctx, m)
+	case *PredictionMutation:
+		return c.Prediction.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -575,5 +585,123 @@ func (c *ParameterClient) mutate(ctx context.Context, m *ParameterMutation) (Val
 		return (&ParameterDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Parameter mutation op: %q", m.Op())
+	}
+}
+
+// PredictionClient is a client for the Prediction schema.
+type PredictionClient struct {
+	config
+}
+
+// NewPredictionClient returns a client for the Prediction from the given config.
+func NewPredictionClient(c config) *PredictionClient {
+	return &PredictionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `prediction.Hooks(f(g(h())))`.
+func (c *PredictionClient) Use(hooks ...Hook) {
+	c.hooks.Prediction = append(c.hooks.Prediction, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `prediction.Intercept(f(g(h())))`.
+func (c *PredictionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Prediction = append(c.inters.Prediction, interceptors...)
+}
+
+// Create returns a builder for creating a Prediction entity.
+func (c *PredictionClient) Create() *PredictionCreate {
+	mutation := newPredictionMutation(c.config, OpCreate)
+	return &PredictionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Prediction entities.
+func (c *PredictionClient) CreateBulk(builders ...*PredictionCreate) *PredictionCreateBulk {
+	return &PredictionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Prediction.
+func (c *PredictionClient) Update() *PredictionUpdate {
+	mutation := newPredictionMutation(c.config, OpUpdate)
+	return &PredictionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PredictionClient) UpdateOne(pr *Prediction) *PredictionUpdateOne {
+	mutation := newPredictionMutation(c.config, OpUpdateOne, withPrediction(pr))
+	return &PredictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PredictionClient) UpdateOneID(id uuid.UUID) *PredictionUpdateOne {
+	mutation := newPredictionMutation(c.config, OpUpdateOne, withPredictionID(id))
+	return &PredictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Prediction.
+func (c *PredictionClient) Delete() *PredictionDelete {
+	mutation := newPredictionMutation(c.config, OpDelete)
+	return &PredictionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PredictionClient) DeleteOne(pr *Prediction) *PredictionDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PredictionClient) DeleteOneID(id uuid.UUID) *PredictionDeleteOne {
+	builder := c.Delete().Where(prediction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PredictionDeleteOne{builder}
+}
+
+// Query returns a query builder for Prediction.
+func (c *PredictionClient) Query() *PredictionQuery {
+	return &PredictionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePrediction},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Prediction entity by its id.
+func (c *PredictionClient) Get(ctx context.Context, id uuid.UUID) (*Prediction, error) {
+	return c.Query().Where(prediction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PredictionClient) GetX(ctx context.Context, id uuid.UUID) *Prediction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PredictionClient) Hooks() []Hook {
+	return c.hooks.Prediction
+}
+
+// Interceptors returns the client interceptors.
+func (c *PredictionClient) Interceptors() []Interceptor {
+	return c.inters.Prediction
+}
+
+func (c *PredictionClient) mutate(ctx context.Context, m *PredictionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PredictionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PredictionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PredictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PredictionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Prediction mutation op: %q", m.Op())
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/prediction"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/schema"
 )
 
@@ -46,4 +47,14 @@ func init() {
 	parameterDescID := parameterFields[0].Descriptor()
 	// parameter.DefaultID holds the default value on creation for the id field.
 	parameter.DefaultID = parameterDescID.Default.(func() uuid.UUID)
+	predictionFields := schema.Prediction{}.Fields()
+	_ = predictionFields
+	// predictionDescCreatedAt is the schema descriptor for created_at field.
+	predictionDescCreatedAt := predictionFields[3].Descriptor()
+	// prediction.DefaultCreatedAt holds the default value on creation for the created_at field.
+	prediction.DefaultCreatedAt = predictionDescCreatedAt.Default.(func() time.Time)
+	// predictionDescID is the schema descriptor for id field.
+	predictionDescID := predictionFields[0].Descriptor()
+	// prediction.DefaultID holds the default value on creation for the id field.
+	prediction.DefaultID = predictionDescID.Default.(func() uuid.UUID)
 }

@@ -62,3 +62,30 @@ func (h *CrudHandler) GetDataPoints(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, model.DashboardFromEntDataset(dataset))
 }
+
+func (h *CrudHandler) GetPredictions(c echo.Context) error {
+	// ctx := c.Request().Context()
+
+	// preiction, err := h.db.Dataset.Query().Where(
+	// 	dataset.NameEQ(req.Dataset),
+	// ).WithDatapoints(
+	// 	func(q *ent.DatapointQuery) {
+	// 		q.Where(
+	// 			datapoint.And(
+	// 				datapoint.DataTimeGTE(req.From),
+	// 				datapoint.DataTimeLTE(req.To),
+	// 			),
+	// 		)
+	// 		q.Limit(1500)
+	// 		q.Order(ent.Asc(datapoint.FieldDataTime))
+	// 	},
+	// ).WithParameters().
+	// 	First(ctx)
+	// fmt.Println(dataset.Edges.Parameters)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// return c.JSON(http.StatusOK, model.DashboardFromEntDataset(dataset))
+	return nil
+}
