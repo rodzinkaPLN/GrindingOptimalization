@@ -8,6 +8,7 @@ import './App.css';
 import Chart from './Chart';
 import DTPicker from './DatePicker';
 import { Grid } from '@mui/material';
+import Recommendations from './Recommendations';
 
 function daysFromNow(days) {
   const copy = new Date()
@@ -52,7 +53,7 @@ function App() {
       </AppBar>
       <div className="App">
 
-        <Grid container spacing={2} columns={16}>
+        <Grid container spacing={2} columns={16} padding="2em" paddingTop="5em">
           <Grid item xs={10}>
             <Chart
               data={data}
@@ -60,7 +61,7 @@ function App() {
             />
           </Grid>
           <Grid item xs={4}>
-            xs=8
+            <Recommendations />
           </Grid>
         </Grid>
 
