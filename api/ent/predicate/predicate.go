@@ -17,3 +17,6 @@ type Parameter func(*sql.Selector)
 
 // Prediction is the predicate function for prediction builders.
 type Prediction func(*sql.Selector)
+
+// Userinput is the predicate function for userinput builders.
+type Userinput func(*sql.Selector)

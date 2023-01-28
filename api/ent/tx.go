@@ -20,6 +20,8 @@ type Tx struct {
 	Parameter *ParameterClient
 	// Prediction is the client for interacting with the Prediction builders.
 	Prediction *PredictionClient
+	// Userinput is the client for interacting with the Userinput builders.
+	Userinput *UserinputClient
 
 	// lazily loaded.
 	client     *Client
@@ -155,6 +157,7 @@ func (tx *Tx) init() {
 	tx.Dataset = NewDatasetClient(tx.config)
 	tx.Parameter = NewParameterClient(tx.config)
 	tx.Prediction = NewPredictionClient(tx.config)
+	tx.Userinput = NewUserinputClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

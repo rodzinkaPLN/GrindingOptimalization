@@ -31,12 +31,14 @@ type (
 		Dataset    []ent.Hook
 		Parameter  []ent.Hook
 		Prediction []ent.Hook
+		Userinput  []ent.Hook
 	}
 	inters struct {
 		Datapoint  []ent.Interceptor
 		Dataset    []ent.Interceptor
 		Parameter  []ent.Interceptor
 		Prediction []ent.Interceptor
+		Userinput  []ent.Interceptor
 	}
 )
 

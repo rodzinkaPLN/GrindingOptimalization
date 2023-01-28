@@ -15,6 +15,7 @@ import (
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/prediction"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/userinput"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -46,6 +47,7 @@ func columnChecker(table string) func(string) error {
 		dataset.Table:    dataset.ValidColumn,
 		parameter.Table:  parameter.ValidColumn,
 		prediction.Table: prediction.ValidColumn,
+		userinput.Table:  userinput.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

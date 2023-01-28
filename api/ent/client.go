@@ -15,6 +15,7 @@ import (
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/prediction"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/userinput"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -34,6 +35,8 @@ type Client struct {
 	Parameter *ParameterClient
 	// Prediction is the client for interacting with the Prediction builders.
 	Prediction *PredictionClient
+	// Userinput is the client for interacting with the Userinput builders.
+	Userinput *UserinputClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -51,6 +54,7 @@ func (c *Client) init() {
 	c.Dataset = NewDatasetClient(c.config)
 	c.Parameter = NewParameterClient(c.config)
 	c.Prediction = NewPredictionClient(c.config)
+	c.Userinput = NewUserinputClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -88,6 +92,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Dataset:    NewDatasetClient(cfg),
 		Parameter:  NewParameterClient(cfg),
 		Prediction: NewPredictionClient(cfg),
+		Userinput:  NewUserinputClient(cfg),
 	}, nil
 }
 
@@ -111,6 +116,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Dataset:    NewDatasetClient(cfg),
 		Parameter:  NewParameterClient(cfg),
 		Prediction: NewPredictionClient(cfg),
+		Userinput:  NewUserinputClient(cfg),
 	}, nil
 }
 
@@ -143,6 +149,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Dataset.Use(hooks...)
 	c.Parameter.Use(hooks...)
 	c.Prediction.Use(hooks...)
+	c.Userinput.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
@@ -152,6 +159,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Dataset.Intercept(interceptors...)
 	c.Parameter.Intercept(interceptors...)
 	c.Prediction.Intercept(interceptors...)
+	c.Userinput.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -165,6 +173,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Parameter.mutate(ctx, m)
 	case *PredictionMutation:
 		return c.Prediction.mutate(ctx, m)
+	case *UserinputMutation:
+		return c.Userinput.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -703,5 +713,123 @@ func (c *PredictionClient) mutate(ctx context.Context, m *PredictionMutation) (V
 		return (&PredictionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Prediction mutation op: %q", m.Op())
+	}
+}
+
+// UserinputClient is a client for the Userinput schema.
+type UserinputClient struct {
+	config
+}
+
+// NewUserinputClient returns a client for the Userinput from the given config.
+func NewUserinputClient(c config) *UserinputClient {
+	return &UserinputClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userinput.Hooks(f(g(h())))`.
+func (c *UserinputClient) Use(hooks ...Hook) {
+	c.hooks.Userinput = append(c.hooks.Userinput, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userinput.Intercept(f(g(h())))`.
+func (c *UserinputClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Userinput = append(c.inters.Userinput, interceptors...)
+}
+
+// Create returns a builder for creating a Userinput entity.
+func (c *UserinputClient) Create() *UserinputCreate {
+	mutation := newUserinputMutation(c.config, OpCreate)
+	return &UserinputCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Userinput entities.
+func (c *UserinputClient) CreateBulk(builders ...*UserinputCreate) *UserinputCreateBulk {
+	return &UserinputCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Userinput.
+func (c *UserinputClient) Update() *UserinputUpdate {
+	mutation := newUserinputMutation(c.config, OpUpdate)
+	return &UserinputUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserinputClient) UpdateOne(u *Userinput) *UserinputUpdateOne {
+	mutation := newUserinputMutation(c.config, OpUpdateOne, withUserinput(u))
+	return &UserinputUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserinputClient) UpdateOneID(id uuid.UUID) *UserinputUpdateOne {
+	mutation := newUserinputMutation(c.config, OpUpdateOne, withUserinputID(id))
+	return &UserinputUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Userinput.
+func (c *UserinputClient) Delete() *UserinputDelete {
+	mutation := newUserinputMutation(c.config, OpDelete)
+	return &UserinputDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserinputClient) DeleteOne(u *Userinput) *UserinputDeleteOne {
+	return c.DeleteOneID(u.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserinputClient) DeleteOneID(id uuid.UUID) *UserinputDeleteOne {
+	builder := c.Delete().Where(userinput.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserinputDeleteOne{builder}
+}
+
+// Query returns a query builder for Userinput.
+func (c *UserinputClient) Query() *UserinputQuery {
+	return &UserinputQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserinput},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Userinput entity by its id.
+func (c *UserinputClient) Get(ctx context.Context, id uuid.UUID) (*Userinput, error) {
+	return c.Query().Where(userinput.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserinputClient) GetX(ctx context.Context, id uuid.UUID) *Userinput {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UserinputClient) Hooks() []Hook {
+	return c.hooks.Userinput
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserinputClient) Interceptors() []Interceptor {
+	return c.inters.Userinput
+}
+
+func (c *UserinputClient) mutate(ctx context.Context, m *UserinputMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserinputCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserinputUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserinputUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserinputDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Userinput mutation op: %q", m.Op())
 	}
 }

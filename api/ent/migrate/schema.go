@@ -77,12 +77,28 @@ var (
 		Columns:    PredictionsColumns,
 		PrimaryKey: []*schema.Column{PredictionsColumns[0]},
 	}
+	// UserinputsColumns holds the columns for the "userinputs" table.
+	UserinputsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "min", Type: field.TypeFloat64},
+		{Name: "max", Type: field.TypeFloat64},
+		{Name: "step", Type: field.TypeFloat64},
+		{Name: "defaultval", Type: field.TypeFloat64},
+		{Name: "name", Type: field.TypeString},
+	}
+	// UserinputsTable holds the schema information for the "userinputs" table.
+	UserinputsTable = &schema.Table{
+		Name:       "userinputs",
+		Columns:    UserinputsColumns,
+		PrimaryKey: []*schema.Column{UserinputsColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		DatapointsTable,
 		DatasetsTable,
 		ParametersTable,
 		PredictionsTable,
+		UserinputsTable,
 	}
 )
 

@@ -11,6 +11,7 @@ import (
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/parameter"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/prediction"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/schema"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/userinput"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -57,4 +58,10 @@ func init() {
 	predictionDescID := predictionFields[0].Descriptor()
 	// prediction.DefaultID holds the default value on creation for the id field.
 	prediction.DefaultID = predictionDescID.Default.(func() uuid.UUID)
+	userinputFields := schema.Userinput{}.Fields()
+	_ = userinputFields
+	// userinputDescID is the schema descriptor for id field.
+	userinputDescID := userinputFields[0].Descriptor()
+	// userinput.DefaultID holds the default value on creation for the id field.
+	userinput.DefaultID = userinputDescID.Default.(func() uuid.UUID)
 }

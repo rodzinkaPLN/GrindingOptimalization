@@ -16,6 +16,7 @@ import (
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/predicate"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/prediction"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/schema"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/userinput"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -34,6 +35,7 @@ const (
 	TypeDataset    = "Dataset"
 	TypeParameter  = "Parameter"
 	TypePrediction = "Prediction"
+	TypeUserinput  = "Userinput"
 )
 
 // DatapointMutation represents an operation that mutates the Datapoint nodes in the graph.
@@ -2200,4 +2202,687 @@ func (m *PredictionMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PredictionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Prediction edge %s", name)
+}
+
+// UserinputMutation represents an operation that mutates the Userinput nodes in the graph.
+type UserinputMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	min           *float64
+	addmin        *float64
+	max           *float64
+	addmax        *float64
+	step          *float64
+	addstep       *float64
+	defaultval    *float64
+	adddefaultval *float64
+	name          *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Userinput, error)
+	predicates    []predicate.Userinput
+}
+
+var _ ent.Mutation = (*UserinputMutation)(nil)
+
+// userinputOption allows management of the mutation configuration using functional options.
+type userinputOption func(*UserinputMutation)
+
+// newUserinputMutation creates new mutation for the Userinput entity.
+func newUserinputMutation(c config, op Op, opts ...userinputOption) *UserinputMutation {
+	m := &UserinputMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeUserinput,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withUserinputID sets the ID field of the mutation.
+func withUserinputID(id uuid.UUID) userinputOption {
+	return func(m *UserinputMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Userinput
+		)
+		m.oldValue = func(ctx context.Context) (*Userinput, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Userinput.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withUserinput sets the old Userinput of the mutation.
+func withUserinput(node *Userinput) userinputOption {
+	return func(m *UserinputMutation) {
+		m.oldValue = func(context.Context) (*Userinput, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m UserinputMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m UserinputMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Userinput entities.
+func (m *UserinputMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *UserinputMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *UserinputMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Userinput.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetMin sets the "min" field.
+func (m *UserinputMutation) SetMin(f float64) {
+	m.min = &f
+	m.addmin = nil
+}
+
+// Min returns the value of the "min" field in the mutation.
+func (m *UserinputMutation) Min() (r float64, exists bool) {
+	v := m.min
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMin returns the old "min" field's value of the Userinput entity.
+// If the Userinput object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserinputMutation) OldMin(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMin: %w", err)
+	}
+	return oldValue.Min, nil
+}
+
+// AddMin adds f to the "min" field.
+func (m *UserinputMutation) AddMin(f float64) {
+	if m.addmin != nil {
+		*m.addmin += f
+	} else {
+		m.addmin = &f
+	}
+}
+
+// AddedMin returns the value that was added to the "min" field in this mutation.
+func (m *UserinputMutation) AddedMin() (r float64, exists bool) {
+	v := m.addmin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMin resets all changes to the "min" field.
+func (m *UserinputMutation) ResetMin() {
+	m.min = nil
+	m.addmin = nil
+}
+
+// SetMax sets the "max" field.
+func (m *UserinputMutation) SetMax(f float64) {
+	m.max = &f
+	m.addmax = nil
+}
+
+// Max returns the value of the "max" field in the mutation.
+func (m *UserinputMutation) Max() (r float64, exists bool) {
+	v := m.max
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMax returns the old "max" field's value of the Userinput entity.
+// If the Userinput object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserinputMutation) OldMax(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMax is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMax requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMax: %w", err)
+	}
+	return oldValue.Max, nil
+}
+
+// AddMax adds f to the "max" field.
+func (m *UserinputMutation) AddMax(f float64) {
+	if m.addmax != nil {
+		*m.addmax += f
+	} else {
+		m.addmax = &f
+	}
+}
+
+// AddedMax returns the value that was added to the "max" field in this mutation.
+func (m *UserinputMutation) AddedMax() (r float64, exists bool) {
+	v := m.addmax
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMax resets all changes to the "max" field.
+func (m *UserinputMutation) ResetMax() {
+	m.max = nil
+	m.addmax = nil
+}
+
+// SetStep sets the "step" field.
+func (m *UserinputMutation) SetStep(f float64) {
+	m.step = &f
+	m.addstep = nil
+}
+
+// Step returns the value of the "step" field in the mutation.
+func (m *UserinputMutation) Step() (r float64, exists bool) {
+	v := m.step
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStep returns the old "step" field's value of the Userinput entity.
+// If the Userinput object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserinputMutation) OldStep(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStep is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStep requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStep: %w", err)
+	}
+	return oldValue.Step, nil
+}
+
+// AddStep adds f to the "step" field.
+func (m *UserinputMutation) AddStep(f float64) {
+	if m.addstep != nil {
+		*m.addstep += f
+	} else {
+		m.addstep = &f
+	}
+}
+
+// AddedStep returns the value that was added to the "step" field in this mutation.
+func (m *UserinputMutation) AddedStep() (r float64, exists bool) {
+	v := m.addstep
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStep resets all changes to the "step" field.
+func (m *UserinputMutation) ResetStep() {
+	m.step = nil
+	m.addstep = nil
+}
+
+// SetDefaultval sets the "defaultval" field.
+func (m *UserinputMutation) SetDefaultval(f float64) {
+	m.defaultval = &f
+	m.adddefaultval = nil
+}
+
+// Defaultval returns the value of the "defaultval" field in the mutation.
+func (m *UserinputMutation) Defaultval() (r float64, exists bool) {
+	v := m.defaultval
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDefaultval returns the old "defaultval" field's value of the Userinput entity.
+// If the Userinput object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserinputMutation) OldDefaultval(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDefaultval is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDefaultval requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDefaultval: %w", err)
+	}
+	return oldValue.Defaultval, nil
+}
+
+// AddDefaultval adds f to the "defaultval" field.
+func (m *UserinputMutation) AddDefaultval(f float64) {
+	if m.adddefaultval != nil {
+		*m.adddefaultval += f
+	} else {
+		m.adddefaultval = &f
+	}
+}
+
+// AddedDefaultval returns the value that was added to the "defaultval" field in this mutation.
+func (m *UserinputMutation) AddedDefaultval() (r float64, exists bool) {
+	v := m.adddefaultval
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDefaultval resets all changes to the "defaultval" field.
+func (m *UserinputMutation) ResetDefaultval() {
+	m.defaultval = nil
+	m.adddefaultval = nil
+}
+
+// SetName sets the "name" field.
+func (m *UserinputMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *UserinputMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Userinput entity.
+// If the Userinput object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserinputMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *UserinputMutation) ResetName() {
+	m.name = nil
+}
+
+// Where appends a list predicates to the UserinputMutation builder.
+func (m *UserinputMutation) Where(ps ...predicate.Userinput) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the UserinputMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UserinputMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Userinput, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *UserinputMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserinputMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Userinput).
+func (m *UserinputMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *UserinputMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.min != nil {
+		fields = append(fields, userinput.FieldMin)
+	}
+	if m.max != nil {
+		fields = append(fields, userinput.FieldMax)
+	}
+	if m.step != nil {
+		fields = append(fields, userinput.FieldStep)
+	}
+	if m.defaultval != nil {
+		fields = append(fields, userinput.FieldDefaultval)
+	}
+	if m.name != nil {
+		fields = append(fields, userinput.FieldName)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *UserinputMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case userinput.FieldMin:
+		return m.Min()
+	case userinput.FieldMax:
+		return m.Max()
+	case userinput.FieldStep:
+		return m.Step()
+	case userinput.FieldDefaultval:
+		return m.Defaultval()
+	case userinput.FieldName:
+		return m.Name()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *UserinputMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case userinput.FieldMin:
+		return m.OldMin(ctx)
+	case userinput.FieldMax:
+		return m.OldMax(ctx)
+	case userinput.FieldStep:
+		return m.OldStep(ctx)
+	case userinput.FieldDefaultval:
+		return m.OldDefaultval(ctx)
+	case userinput.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown Userinput field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UserinputMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case userinput.FieldMin:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMin(v)
+		return nil
+	case userinput.FieldMax:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMax(v)
+		return nil
+	case userinput.FieldStep:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStep(v)
+		return nil
+	case userinput.FieldDefaultval:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDefaultval(v)
+		return nil
+	case userinput.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Userinput field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *UserinputMutation) AddedFields() []string {
+	var fields []string
+	if m.addmin != nil {
+		fields = append(fields, userinput.FieldMin)
+	}
+	if m.addmax != nil {
+		fields = append(fields, userinput.FieldMax)
+	}
+	if m.addstep != nil {
+		fields = append(fields, userinput.FieldStep)
+	}
+	if m.adddefaultval != nil {
+		fields = append(fields, userinput.FieldDefaultval)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *UserinputMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case userinput.FieldMin:
+		return m.AddedMin()
+	case userinput.FieldMax:
+		return m.AddedMax()
+	case userinput.FieldStep:
+		return m.AddedStep()
+	case userinput.FieldDefaultval:
+		return m.AddedDefaultval()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *UserinputMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case userinput.FieldMin:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMin(v)
+		return nil
+	case userinput.FieldMax:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMax(v)
+		return nil
+	case userinput.FieldStep:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStep(v)
+		return nil
+	case userinput.FieldDefaultval:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDefaultval(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Userinput numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *UserinputMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *UserinputMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *UserinputMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Userinput nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *UserinputMutation) ResetField(name string) error {
+	switch name {
+	case userinput.FieldMin:
+		m.ResetMin()
+		return nil
+	case userinput.FieldMax:
+		m.ResetMax()
+		return nil
+	case userinput.FieldStep:
+		m.ResetStep()
+		return nil
+	case userinput.FieldDefaultval:
+		m.ResetDefaultval()
+		return nil
+	case userinput.FieldName:
+		m.ResetName()
+		return nil
+	}
+	return fmt.Errorf("unknown Userinput field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *UserinputMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *UserinputMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *UserinputMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *UserinputMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *UserinputMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *UserinputMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *UserinputMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Userinput unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *UserinputMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Userinput edge %s", name)
 }
