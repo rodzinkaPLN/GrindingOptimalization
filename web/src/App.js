@@ -7,6 +7,7 @@ import UnstyledSelectsMultiple from './StyledMultipicker';
 import './App.css';
 import Chart from './Chart';
 import DTPicker from './DatePicker';
+import { Grid } from '@mui/material';
 
 function daysFromNow(days) {
   const copy = new Date()
@@ -50,10 +51,18 @@ function App() {
         </Toolbar>
       </AppBar>
       <div className="App">
-        <Chart
-          data={data}
-          pickedParams={pickedParams}
-        />
+
+        <Grid container spacing={2} columns={16}>
+          <Grid item xs={12}>
+            <Chart
+              data={data}
+              pickedParams={pickedParams}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            xs=8
+          </Grid>
+        </Grid>
 
       </div>
     </>

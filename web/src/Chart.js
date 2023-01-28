@@ -2,7 +2,7 @@ import { Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import React, { useState } from 'react';
 import {
-    Line, LineChart, Tooltip, XAxis,
+    Line, LineChart, ResponsiveContainer, Tooltip, XAxis,
     YAxis
 } from 'recharts';
 
@@ -39,36 +39,36 @@ const Chart = (props) => {
 
 
     return (
-        <div>
+        <>
             {
                 props.data.parameters.
                     filter(v => props.pickedParams.includes(v.key)).
                     map(param => (
                         <>
                             <Typography >{param.key}</Typography>
-                            <LineChart
-                                width={width * 0.9}
-                                height={height / 4}
-                                data={props.data.data.filter(d => param.key in d)}
-                                syncId="anyId"
-                                onMouseEnter={() => {
-                                    setLastHovered(param.key)
-                                }}
-                            >
-                                <XAxis
-                                    dataKey="ts"
-                                    name="Data"
-                                    interval={props.data.data.length / 20}
-                                />
-                                <YAxis />
-                                <Line type="monotone" dataKey={param.key} stroke="#8884d8" />
-                                {lastHovered == param.key &&
-                                    <Tooltip content={<CustomTooltip key={param.key} />} />}
-                            </LineChart>
+                            <ResponsiveContainer width="100%" height={height / 4}>
+                                <LineChart
+                                    data={props.data.data.filter(d => param.key in d)}
+                                    syncId="anyId"
+                                    onMouseEnter={() => {
+                                        setLastHovered(param.key)
+                                    }}
+                                >
+                                    <XAxis
+                                        dataKey="ts"
+                                        name="Data"
+                                        interval={props.data.data.length / 20}
+                                    />
+                                    <YAxis />
+                                    <Line type="monotone" dataKey={param.key} stroke="#8884d8" />
+                                    {lastHovered == param.key &&
+                                        <Tooltip content={<CustomTooltip key={param.key} />} />}
+                                </LineChart>
+                            </ResponsiveContainer>
                         </>
                     ))
             }
-        </div>)
+        </>)
 }
 
 export default Chart;
