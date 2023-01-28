@@ -1,21 +1,33 @@
-import { Button, Card, CardActions, CardContent, CircularProgress, Slider, Typography } from '@mui/material';
+import { Button, Card, CardActions, CardContent, CircularProgress, Slider, TextField, Typography } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import * as React from 'react';
 
 const SingleInput = (props) => {
-    const [val, setVal] = React.useState(props.input.defaultValue)
+    const [val, setVal] = React.useState(props.input.default_value)
     const v = props.input;
     return <Card raised>
         <CardContent>
-            <Typography textAlign='left'>{`Typ  : ${v.name}`}</Typography>
+            <TextField
+                fullWidth
+                id=""
+                label={v.name}
+                type="number"
+                onChange={(e) => {
+                    setVal(parseFloat(e.target.value));
+                }}
+                value={val}
+            />
         </CardContent>
         <CardActions sx={{
             justifyContent: 'center',
         }}>
             <Slider
-                defaultValue={v.default_value}
-                aria-label="Default"
-                valueLabelDisplay="auto"
+                key={`slider-${v.name}`}
+                value={val}
+                onChange={(_, vx) => {
+                    setVal(vx);
+                }}
+                valueLabelDisplay="on"
                 step={v.step}
                 min={v.min}
                 max={v.max}
