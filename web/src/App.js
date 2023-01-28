@@ -51,9 +51,9 @@ function App() {
           />
         </Toolbar>
       </AppBar>
-      <div className="App">
+      <div className="App" >
 
-        <Grid container spacing={2} columns={16} padding="2em" paddingTop="5em">
+        <Grid container spacing={2} columns={16} paddingTop="5em">
           <Grid item xs={10}>
             <Chart
               data={data}
