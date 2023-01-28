@@ -20,6 +20,17 @@ type Prediction struct {
 	Data map[string]any `json:"data"`
 }
 
+type Userinput struct {
+	Min          float64 `json:"min"`
+	Max          float64 `json:"max"`
+	DefaultValue float64 `json:"default_value"`
+	Step         float64 `json:"step"`
+	Name         string
+}
+type Userinputs struct {
+	Data []Userinput `json:"data"`
+}
+
 func DashboardFromEntDataset(in *ent.Dataset) Dashboard {
 	out := Dashboard{
 		Parameters: make([]Parameter, len(in.Edges.Parameters)),
@@ -48,6 +59,21 @@ func PredictionFromEntPrediction(in *ent.Prediction) Prediction {
 	out.Data = make(map[string]any)
 	for k, v := range in.Vals {
 		out.Data[k] = v
+	}
+	return out
+}
+
+func UserinputFromEntUserinput(ins []*ent.Userinput) Userinputs {
+	var out Userinputs
+	out.Data = make([]Userinput, len(ins))
+	for k, v := range ins {
+		out.Data[k] = Userinput{
+			Min:          v.Min,
+			Max:          v.Max,
+			DefaultValue: v.Defaultval,
+			Step:         v.Step,
+			Name:         v.Name,
+		}
 	}
 	return out
 }

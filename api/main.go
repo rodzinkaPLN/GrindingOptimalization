@@ -81,5 +81,6 @@ func main() {
 	data.GET("", crudHandler.GetDataPoints)
 	data.GET("/predictions", crudHandler.GetPredictions)
 
+	api.GET("/userinputs", crudHandler.GetUserinputs)
 	log.Fatal(e.Start(cfg.Server.Address()))
 }

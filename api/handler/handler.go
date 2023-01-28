@@ -11,6 +11,7 @@ import (
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/datapoint"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/dataset"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/prediction"
+	"github.com/rodzinkaPLN/GrindingOptimalization/api/ent/userinput"
 	"github.com/rodzinkaPLN/GrindingOptimalization/api/model"
 )
 
@@ -76,4 +77,18 @@ func (h *CrudHandler) GetPredictions(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, model.PredictionFromEntPrediction(prediction))
+}
+
+func (h *CrudHandler) GetUserinputs(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	userinputs, err := h.db.
+		Userinput.
+		Query().
+		Order(ent.Desc(userinput.FieldName)).All(ctx)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, model.UserinputFromEntUserinput(userinputs))
 }
